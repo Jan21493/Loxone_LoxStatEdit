@@ -120,33 +120,115 @@
   <metadata name="fileInfoLabel.GenerateMember" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>False</value>
   </metadata>
-  <metadata name="saveButton.GenerateMember" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+  <metadata name="CancelButton.GenerateMember" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>False</value>
   </metadata>
   <metadata name="toolTip.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>150, 17</value>
-  </metadata>
-  <metadata name="loadButton.GenerateMember" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
-    <value>False</value>
-  </metadata>
-  <metadata name="browseButton.GenerateMember" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
-    <value>False</value>
+    <value>193, 22</value>
   </metadata>
   <metadata name="fileNameLabel.GenerateMember" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+    <value>False</value>
+  </metadata>
+  <metadata name="OkButton.GenerateMember" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+    <value>False</value>
+  </metadata>
+  <metadata name="changeIntervalLabel.GenerateMember" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+    <value>False</value>
+  </metadata>
+  <metadata name="changeIntervalPowerlabel.GenerateMember" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+    <value>False</value>
+  </metadata>
+  <metadata name="selectUUIDlabel.GenerateMember" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+    <value>False</value>
+  </metadata>
+  <metadata name="writeValuelabel.GenerateMember" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+    <value>False</value>
+  </metadata>
+  <metadata name="changeIntervalTolabel.GenerateMember" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+    <value>False</value>
+  </metadata>
+  <metadata name="newDescriptionLabel.GenerateMember" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+    <value>False</value>
+  </metadata>
+  <metadata name="infoLabel.GenerateMember" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>False</value>
   </metadata>
   <metadata name="openFileDialog.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>17, 17</value>
   </metadata>
-  <metadata name="indexColumn.UserAddedColumn" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
-    <value>True</value>
+  <metadata name="toolTip.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>193, 22</value>
   </metadata>
-  <metadata name="timestampColumn.UserAddedColumn" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
-    <value>True</value>
+  <data name="convertOldRadioButton.ToolTip" xml:space="preserve">
+    <value>This function converts statistics data from a meter with old statistics style (e.g. a utility meter function block) to an
+universal meter function block (with 'Pf' and 'Mr' inputs). 
+
+1. At first you have to create the new meter function blocks in Loxone Config to get internal UUIDs that are used a file names.
+2. Then you convert the statistics data for previous months / years from the old to the new one by selecting its UUID. 
+
+Optional: You may decrease the interval, e.g. from 10 minutes to 1 hour (recommended) to reduce the amount of data.
+If the interval is higher than before, the missing values are calculated. The some of the new meters (e.g. bidirectional meters)
+support separate intervals for consumption/flow and meter readings.
+
+Data for power/flow is only used to display a single day in the app. It it not used for any summaries. It's not used for any 
+calculations. Therefore you should consider if a more detailed power/flow view (a smaller interval) is desired or
+a more general view with less values (a larger interval) is sufficient. The interval should be as large as possible that fit the needs.
+You may also choose not to create any power/flow data for the new statistics file. 
+
+This is how the function works:
+- Values are transferred from this file (old style, without '_#' in file name) to a function block with new style (with '_#' in file name).
+- It is assumed that 'value' contains the meter readings and 'value 2' (optional) the power / flow data.
+- Data from column 'value' (meter reading) from this file is transferred to new UUID to _2 file into 'value' (consumption) or 'value 2' (feed). 
+- The column can be selected. If the new meter has two columns for data, two columns will be created, otherwise only one.
+- Data from column 'value 2' (power / flow data, if existing) from this file is transferred to new UUID to _1 file into 'value'.
+- If there is no power / flow data, then zeros are written unless option 'Do NOT write any data for power/flow to the new meter.' is choosen.
+
+NOTE: The value for power/flow is a snapshot of the time of the reading. It is NOT an average!
+
+NOTE: the date/time for each value is adjusted, because the old format has used MEZ (UTC+1) while the new format uses UTC.</value>
+  </data>
+  <data name="modifyIntervalRadioButton.ToolTip" xml:space="preserve">
+    <value>This function modifies the interval for statistics data on a meter with old statistics style (e.g. a utility meter function block).
+
+You may decrease the interval, e.g. from 10 minutes to 1 hour (recommended) to reduce the amount of data.
+If the interval is higher than before, the missing values are calculated. 
+
+If there is no existing value for a timestamp, the missing value is calculated by linearly connecting the two existing
+values with nearest timestamps.
+
+NOTE: the date/time for each value in the old format is in MEZ (UTC+1).</value>
+  </data>
+  <data name="modifyInfoNameRadioButton.ToolTip" xml:space="preserve">
+    <value>This function modifies the file info name for this statistics file to the name that is set on the newest 
+statistics file with the same UUID.  This is the name that is configured in Loxone Config as the 
+name for the function block, but you may have changed the name in the past.
+
+The name is not used by Loxone config or within the app, but only in LoxStatEdit to have the same file
+info name for an UUID.</value>
+  </data>
+  <metadata name="helpProvider1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>382, 19</value>
   </metadata>
-  <metadata name="valueColumn.UserAddedColumn" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
-    <value>True</value>
-  </metadata>
+  <data name="disclaimerTextBox.Text" xml:space="preserve">
+    <value>### DISCLAIMER! USE AT YOUR OWN RISK! ###
+
+- I will not (and can not) take any responsibility for any issues of your Loxone installation whatsoever!
+- Loxone will most likely not support any issues, if you use the files generated by this tool either!
+- I am just a desparate Loxone user in need of a solution for a problem and lucky enough to be a professional coder!
+- Loxone did not provide me a full file format documentation and I used a Hex-Editor to decode the file format to some degree!
+- The time format is NOT 100% decoded, especially if your MS is in a different time zone than MET (UTC+1).
+- You should verify all affected statistic files manually by using 'edit' after any conversion.
+  
+### NOTICE ###
+
+To apply the modified statistics further steps are needed!
+
+1. Upload the modified statistics
+2. Restart the Miniserver"
+3. Clear the app cache 
+
+If you don't know how to clear the app cache, then remove and re-add the Miniserver in the app. Should this not help then uninstall and install the app again.</value>
+  </data>
   <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <data name="$this.Icon" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>

@@ -4,13 +4,14 @@ using System.IO;
 
 namespace LoxStatEdit
 {
+    #region class LoxStatDataPoint
     public class LoxStatDataPoint : LoxStatObject
     {
         public static readonly DateTime TimestampBias = new DateTime(2009, 1, 1);
 
         /// <summary>The file to which this data point belongs
         /// </summary>
-        public LoxStatFile LoxStatFile { get; private set; }
+        public LoxStatFile LoxStatFile { get; set; }
         /// <summary>The index of the data point within the file
         /// </summary>
         public int Index { get; set; }
@@ -160,4 +161,20 @@ namespace LoxStatEdit
         }
 
     }
+    #endregion
+
+    #region class LoxStatDataPointEqualityComparer
+    class LoxStatDataPointEqualityComparer : IEqualityComparer<LoxStatDataPoint> {
+        #region IEqualityComparer<LoxStatDataPoint> Members
+
+        public bool Equals(LoxStatDataPoint dP1, LoxStatDataPoint dP2) {
+            return dP1.TimestampOffset.Equals(dP2.TimestampOffset);
+        }
+
+        public int GetHashCode(LoxStatDataPoint dP) {
+            return dP.TimestampOffset.GetHashCode();
+        }
+    }
+    #endregion
 }
+#endregion

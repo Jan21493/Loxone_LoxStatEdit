@@ -46,11 +46,12 @@
             this._fileInfoTextBox = new System.Windows.Forms.TextBox();
             this._dataGridView = new System.Windows.Forms.DataGridView();
             this.indexColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this._timestampColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this._valueColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.timestampColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.valueColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this._fileNameTextBox = new System.Windows.Forms.TextBox();
             this._chart = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.toolTip = new System.Windows.Forms.ToolTip(this.components);
+            this.splitContainer = new System.Windows.Forms.SplitContainer();
             fileInfoLabel = new System.Windows.Forms.Label();
             saveButton = new System.Windows.Forms.Button();
             loadButton = new System.Windows.Forms.Button();
@@ -58,6 +59,10 @@
             fileNameLabel = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this._dataGridView)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this._chart)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer)).BeginInit();
+            this.splitContainer.Panel1.SuspendLayout();
+            this.splitContainer.Panel2.SuspendLayout();
+            this.splitContainer.SuspendLayout();
             this.SuspendLayout();
             // 
             // fileInfoLabel
@@ -147,19 +152,17 @@
             this._dataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this._dataGridView.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.indexColumn,
-            this._timestampColumn,
-            this._valueColumn});
-            this._dataGridView.Location = new System.Drawing.Point(12, 66);
+            this.timestampColumn,
+            this.valueColumn});
+            this._dataGridView.Location = new System.Drawing.Point(0, 0);
             this._dataGridView.Name = "_dataGridView";
             this._dataGridView.RowHeadersWidth = 30;
-            this._dataGridView.Size = new System.Drawing.Size(385, 483);
+            this._dataGridView.Size = new System.Drawing.Size(286, 483);
             this._dataGridView.TabIndex = 8;
             this._dataGridView.VirtualMode = true;
-            this._dataGridView.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this._dataGridView_CellContentClick);
+            this._dataGridView.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.DataGridView_CellContentClick);
             this._dataGridView.CellMouseClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.DataGridView_MouseClick);
-            this._dataGridView.CellValueNeeded += new System.Windows.Forms.DataGridViewCellValueEventHandler(this.DataGridView_CellValueNeeded);
-            this._dataGridView.CellValuePushed += new System.Windows.Forms.DataGridViewCellValueEventHandler(this.DataGridView_CellValuePushed);
-            this._dataGridView.KeyDown += new System.Windows.Forms.KeyEventHandler(this._dataGridView_KeyDown);
+            this._dataGridView.KeyDown += new System.Windows.Forms.KeyEventHandler(this.DataGridView_KeyDown);
             // 
             // indexColumn
             // 
@@ -173,27 +176,27 @@
             this.indexColumn.ReadOnly = true;
             this.indexColumn.Width = 60;
             // 
-            // _timestampColumn
+            // timestampColumn
             // 
             dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle2.Format = "G";
             dataGridViewCellStyle2.NullValue = null;
-            this._timestampColumn.DefaultCellStyle = dataGridViewCellStyle2;
-            this._timestampColumn.HeaderText = "Timestamp";
-            this._timestampColumn.MinimumWidth = 8;
-            this._timestampColumn.Name = "_timestampColumn";
-            this._timestampColumn.Width = 130;
+            this.timestampColumn.DefaultCellStyle = dataGridViewCellStyle2;
+            this.timestampColumn.HeaderText = "Timestamp";
+            this.timestampColumn.MinimumWidth = 8;
+            this.timestampColumn.Name = "timestampColumn";
+            this.timestampColumn.Width = 130;
             // 
-            // _valueColumn
+            // valueColumn
             // 
             dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
             dataGridViewCellStyle3.Format = "N3";
             dataGridViewCellStyle3.NullValue = null;
-            this._valueColumn.DefaultCellStyle = dataGridViewCellStyle3;
-            this._valueColumn.HeaderText = "Value";
-            this._valueColumn.MinimumWidth = 8;
-            this._valueColumn.Name = "_valueColumn";
-            this._valueColumn.Width = 130;
+            this.valueColumn.DefaultCellStyle = dataGridViewCellStyle3;
+            this.valueColumn.HeaderText = "Value";
+            this.valueColumn.MinimumWidth = 8;
+            this.valueColumn.Name = "valueColumn";
+            this.valueColumn.Width = 130;
             // 
             // _fileNameTextBox
             // 
@@ -209,7 +212,10 @@
             this._chart.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this._chart.BorderlineColor = System.Drawing.SystemColors.WindowFrame;
+            this._chart.BorderlineDashStyle = System.Windows.Forms.DataVisualization.Charting.ChartDashStyle.Solid;
             this._chart.BorderSkin.BorderColor = System.Drawing.Color.IndianRed;
+            this._chart.BorderSkin.BorderDashStyle = System.Windows.Forms.DataVisualization.Charting.ChartDashStyle.Dash;
             chartArea1.AxisX.LineColor = System.Drawing.Color.LightGray;
             chartArea1.AxisX.MajorGrid.LineColor = System.Drawing.Color.LightGray;
             chartArea1.AxisX.MajorTickMark.LineColor = System.Drawing.Color.LightGray;
@@ -227,8 +233,8 @@
             legend1.Docking = System.Windows.Forms.DataVisualization.Charting.Docking.Bottom;
             legend1.Name = "Legend1";
             this._chart.Legends.Add(legend1);
-            this._chart.Location = new System.Drawing.Point(402, 66);
-            this._chart.Margin = new System.Windows.Forms.Padding(2);
+            this._chart.Location = new System.Drawing.Point(0, 0);
+            this._chart.Margin = new System.Windows.Forms.Padding(0);
             this._chart.Name = "_chart";
             this._chart.Palette = System.Windows.Forms.DataVisualization.Charting.ChartColorPalette.None;
             this._chart.PaletteCustomColors = new System.Drawing.Color[] {
@@ -241,33 +247,57 @@
             series1.Legend = "Legend1";
             series1.Name = "Series1";
             this._chart.Series.Add(series1);
-            this._chart.Size = new System.Drawing.Size(470, 483);
+            this._chart.Size = new System.Drawing.Size(568, 483);
             this._chart.TabIndex = 9;
             this._chart.Text = "chart1";
+            // 
+            // splitContainer
+            // 
+            this.splitContainer.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.splitContainer.Cursor = System.Windows.Forms.Cursors.VSplit;
+            this.splitContainer.Location = new System.Drawing.Point(12, 66);
+            this.splitContainer.Name = "splitContainer";
+            // 
+            // splitContainer.Panel1
+            // 
+            this.splitContainer.Panel1.Controls.Add(this._dataGridView);
+            // 
+            // splitContainer.Panel2
+            // 
+            this.splitContainer.Panel2.Controls.Add(this._chart);
+            this.splitContainer.Size = new System.Drawing.Size(860, 483);
+            this.splitContainer.SplitterDistance = 286;
+            this.splitContainer.SplitterWidth = 6;
+            this.splitContainer.TabIndex = 10;
             // 
             // LoxStatFileForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(884, 561);
-            this.Controls.Add(this._chart);
+            this.Controls.Add(this.splitContainer);
             this.Controls.Add(this._problemButton);
             this.Controls.Add(saveButton);
-            this.Controls.Add(this._dataGridView);
             this.Controls.Add(this._fileInfoTextBox);
             this.Controls.Add(fileInfoLabel);
             this.Controls.Add(fileNameLabel);
             this.Controls.Add(loadButton);
             this.Controls.Add(this._fileNameTextBox);
             this.Controls.Add(browseButton);
+            this.DoubleBuffered = true;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MinimumSize = new System.Drawing.Size(575, 276);
             this.Name = "LoxStatFileForm";
             this.Text = "Loxone Stats Editor - File Editor";
             this.Load += new System.EventHandler(this.MainForm_Load);
-            this.Resize += new System.EventHandler(this.Form_Resize);
             ((System.ComponentModel.ISupportInitialize)(this._dataGridView)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this._chart)).EndInit();
+            this.splitContainer.Panel1.ResumeLayout(false);
+            this.splitContainer.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer)).EndInit();
+            this.splitContainer.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -281,10 +311,11 @@
         private System.Windows.Forms.Button _problemButton;
         private System.Windows.Forms.TextBox _fileNameTextBox;
         private System.Windows.Forms.DataVisualization.Charting.Chart _chart;
-        private System.Windows.Forms.DataGridViewTextBoxColumn indexColumn;
-        private System.Windows.Forms.DataGridViewTextBoxColumn _timestampColumn;
-        private System.Windows.Forms.DataGridViewTextBoxColumn _valueColumn;
         private System.Windows.Forms.ToolTip toolTip;
+        private System.Windows.Forms.SplitContainer splitContainer;
+        private System.Windows.Forms.DataGridViewTextBoxColumn indexColumn;
+        private System.Windows.Forms.DataGridViewTextBoxColumn timestampColumn;
+        private System.Windows.Forms.DataGridViewTextBoxColumn valueColumn;
     }
 }
 

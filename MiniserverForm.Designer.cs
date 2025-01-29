@@ -43,7 +43,7 @@ namespace LoxStatEdit
             System.Windows.Forms.Button browseFolderButton;
             System.Windows.Forms.Label filterLabel;
             System.Windows.Forms.Button filterButton;
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MiniserverForm));
             this._urlTextBox = new System.Windows.Forms.TextBox();
             this._folderTextBox = new System.Windows.Forms.TextBox();
@@ -61,11 +61,12 @@ namespace LoxStatEdit
             this._deleteCol = new System.Windows.Forms.DataGridViewButtonColumn();
             this.githubLabel = new System.Windows.Forms.LinkLabel();
             this.toolTip = new System.Windows.Forms.ToolTip(this.components);
-            this._filterTextBox = new System.Windows.Forms.TextBox();
+            this._filterComboBox = new System.Windows.Forms.ComboBox();
             this.donateLabel = new System.Windows.Forms.LinkLabel();
             this.progressBar = new System.Windows.Forms.ProgressBar();
             this.progressLabel = new System.Windows.Forms.Label();
             this.folderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
+            this._clearFilterButton = new System.Windows.Forms.Button();
             urlLabel = new System.Windows.Forms.Label();
             refreshFolderButton = new System.Windows.Forms.Button();
             refreshMsButton = new System.Windows.Forms.Button();
@@ -158,7 +159,7 @@ namespace LoxStatEdit
             aboutLabel.Name = "aboutLabel";
             aboutLabel.Size = new System.Drawing.Size(171, 18);
             aboutLabel.TabIndex = 100;
-            aboutLabel.Text = "LoxStatEdit v1.0.6.2 (2025.01.14)";
+            aboutLabel.Text = "LoxStatEdit v1.0.7.0 (2025.01.30)";
             aboutLabel.Click += new System.EventHandler(this.aboutLabel_Click);
             // 
             // openFolderButton
@@ -199,7 +200,7 @@ namespace LoxStatEdit
             // filterButton
             // 
             filterButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            filterButton.Location = new System.Drawing.Point(882, 64);
+            filterButton.Location = new System.Drawing.Point(882, 65);
             filterButton.Margin = new System.Windows.Forms.Padding(6);
             filterButton.Name = "filterButton";
             filterButton.Size = new System.Drawing.Size(75, 23);
@@ -288,8 +289,8 @@ namespace LoxStatEdit
             // _yearMonthCol
             // 
             this._yearMonthCol.DataPropertyName = "YearMonth";
-            dataGridViewCellStyle1.Format = "yyyy-MM";
-            this._yearMonthCol.DefaultCellStyle = dataGridViewCellStyle1;
+            dataGridViewCellStyle4.Format = "yyyy-MM";
+            this._yearMonthCol.DefaultCellStyle = dataGridViewCellStyle4;
             this._yearMonthCol.HeaderText = "Year/Month";
             this._yearMonthCol.MinimumWidth = 10;
             this._yearMonthCol.Name = "_yearMonthCol";
@@ -305,7 +306,6 @@ namespace LoxStatEdit
             this._dateModifiedCol.ReadOnly = true;
             this._dateModifiedCol.ToolTipText = "Date when the file was modified. NOTE: file that were downloaded via FTP have a d" +
     "ate with tiis or last year.";
-            this._dateModifiedCol.Width = 100;
             // 
             // _sizeCol
             // 
@@ -324,7 +324,6 @@ namespace LoxStatEdit
             this._statusCol.Name = "_statusCol";
             this._statusCol.ReadOnly = true;
             this._statusCol.ToolTipText = "Result of comparision between file on Loxone MS and FS (local system)";
-            this._statusCol.Width = 100;
             // 
             // _downloadCol
             // 
@@ -392,17 +391,17 @@ namespace LoxStatEdit
             this.githubLabel.UseCompatibleTextRendering = true;
             this.githubLabel.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.githubLinkLabel_LinkClicked);
             // 
-            // _filterTextBox
+            // _filterComboBox
             // 
-            this._filterTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this._filterComboBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this._filterTextBox.Location = new System.Drawing.Point(88, 66);
-            this._filterTextBox.Margin = new System.Windows.Forms.Padding(6);
-            this._filterTextBox.Name = "_filterTextBox";
-            this._filterTextBox.Size = new System.Drawing.Size(788, 20);
-            this._filterTextBox.TabIndex = 7;
-            this.toolTip.SetToolTip(this._filterTextBox, "Filter entries by file or description");
-            this._filterTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this._filterTextBox_KeyDown);
+            this._filterComboBox.FormattingEnabled = true;
+            this._filterComboBox.Location = new System.Drawing.Point(88, 66);
+            this._filterComboBox.Name = "_filterComboBox";
+            this._filterComboBox.Size = new System.Drawing.Size(759, 21);
+            this._filterComboBox.TabIndex = 7;
+            this.toolTip.SetToolTip(this._filterComboBox, "Filter entries by file or description");
+            this._filterComboBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this._filterComboBox_KeyDown);
             // 
             // donateLabel
             // 
@@ -442,13 +441,25 @@ namespace LoxStatEdit
             this.progressLabel.Text = "Idle";
             this.progressLabel.TextAlign = System.Drawing.ContentAlignment.TopCenter;
             // 
+            // _clearFilterButton
+            // 
+            this._clearFilterButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this._clearFilterButton.Image = ((System.Drawing.Image)(resources.GetObject("_clearFilterButton.Image")));
+            this._clearFilterButton.Location = new System.Drawing.Point(853, 65);
+            this._clearFilterButton.Name = "_clearFilterButton";
+            this._clearFilterButton.Size = new System.Drawing.Size(23, 23);
+            this._clearFilterButton.TabIndex = 106;
+            this._clearFilterButton.UseVisualStyleBackColor = true;
+            this._clearFilterButton.Click += new System.EventHandler(this.ClearFilterButton_Click);
+            // 
             // MiniserverForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(969, 561);
+            this.Controls.Add(this._clearFilterButton);
+            this.Controls.Add(this._filterComboBox);
             this.Controls.Add(filterButton);
-            this.Controls.Add(this._filterTextBox);
             this.Controls.Add(filterLabel);
             this.Controls.Add(refreshMsButton);
             this.Controls.Add(browseFolderButton);
@@ -470,6 +481,7 @@ namespace LoxStatEdit
             this.Margin = new System.Windows.Forms.Padding(6);
             this.MinimumSize = new System.Drawing.Size(750, 270);
             this.Name = "MiniserverForm";
+            this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Show;
             this.Text = "Loxone Stats Editor - Miniserver Browser";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MiniserverForm_Closing);
             this.Load += new System.EventHandler(this.MiniserverForm_Load);
@@ -491,7 +503,6 @@ namespace LoxStatEdit
         private ProgressBar progressBar;
         private Label progressLabel;
         private FolderBrowserDialog folderBrowserDialog;
-        private TextBox _filterTextBox;
         private DataGridViewTextBoxColumn _nameCol;
         private DataGridViewTextBoxColumn _descriptionCol;
         private DataGridViewTextBoxColumn _yearMonthCol;
@@ -503,5 +514,7 @@ namespace LoxStatEdit
         private DataGridViewButtonColumn _uploadCol;
         private DataGridViewButtonColumn _convertCol;
         private DataGridViewButtonColumn _deleteCol;
+        private ComboBox _filterComboBox;
+        private Button _clearFilterButton;
     }
 }

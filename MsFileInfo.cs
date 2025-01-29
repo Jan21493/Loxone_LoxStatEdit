@@ -18,7 +18,7 @@ namespace LoxStatEdit
         public int Size { get; private set; }
         public bool Valid { get; private set; }
 
-        public static IList<MsFileInfo> Load(Uri uri)
+        public static IList<MsFileInfo> EnumerateStatFiles(Uri uri)
         {
             try
             {

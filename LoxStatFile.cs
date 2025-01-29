@@ -42,39 +42,24 @@ namespace LoxStatEdit
 
         public Guid Guid
         {
-            get
-            {
+            get {
                 Guid value;
-                if (Path.GetFileNameWithoutExtension(FileName).Contains('_'))
-                {
-                    Guid.TryParseExact
-                    (
-                       Path.GetFileNameWithoutExtension(FileName).Split('_')[0].
-                           Replace("-", ""),
-                       "N",
-                       out value
-                    );
+                if (Path.GetFileNameWithoutExtension(FileName).Contains('_')) {
+                    Guid.TryParseExact(Path.GetFileNameWithoutExtension(FileName).Split('_')[0].
+                       Replace("-", ""), "N", out value);
+                } else {
+                    Guid.TryParseExact(Path.GetFileNameWithoutExtension(FileName).
+                       Replace("-", ""), "N", out value);
                 }
-                else
-                {
-                    Guid.TryParseExact
-                    (
-                       Path.GetFileNameWithoutExtension(FileName).
-                           Replace("-", ""),
-                       "N",
-                       out value
-                    );
-                }
-               
-               
                 return value;
+            }
+            set {
             }
         }
 
         public DateTime YearMonth
         {
-            get
-            {
+            get {
                 return GetYearMonth(FileName);
             }
         }
@@ -87,14 +72,13 @@ namespace LoxStatEdit
             }
             set
             {
-                Encoding.UTF8.GetBytes(value);
+                TextBytes = Encoding.UTF8.GetBytes(value);
                 TextLength = TextBytes.Length;
-                Padding = new byte[GetPaddingLength(12 + TextLength)];
+                Padding = new byte[GetPaddingLength(13 + TextLength)];
             }
         }
 
-        public static DateTime GetYearMonth(string fileName)
-        {
+        public static DateTime GetYearMonth(string fileName) {
             DateTime value;
             DateTime.TryParseExact
             (
@@ -154,8 +138,9 @@ namespace LoxStatEdit
 
         public static LoxStatFile Load(string fileName, bool headerOnly = false)
         {
-            var loxStatFile = new LoxStatFile();
-            loxStatFile.FileName = fileName;
+            var loxStatFile = new LoxStatFile {
+                FileName = fileName
+            };
             try
             {
                 using (var reader = new BinaryReader(File.Open(fileName, FileMode.Open)))
@@ -169,7 +154,7 @@ namespace LoxStatEdit
                     loxStatFile.Padding = reader.ReadBytes(
                         loxStatFile.GetPaddingLength(13 + loxStatFile.TextLength));
 
-                    var dataPoints = new List<LoxStatDataPoint>();
+                    List<LoxStatDataPoint> dataPoints = new List<LoxStatDataPoint>();
                     loxStatFile.DataPoints = dataPoints;
                     if (!headerOnly)
                         LoxStatDataPoint.FromBinaryReader(loxStatFile, reader);
