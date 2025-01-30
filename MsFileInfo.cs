@@ -64,7 +64,7 @@ namespace LoxStatEdit
                         // special handling for Feb 29 to avoid invalid parsing without a year: add a day that will be subtracted later
                         if (dateString.StartsWith("Feb 29"))
                         {
-                            dateString = $"Mar 01 {groups[2].Value.Substring(7)}";
+                            dateString = $"Mar 01 {dateString.Substring(7)}";
                             isFeb29 = true;
                         }
 
