@@ -43,8 +43,10 @@ namespace LoxStatEdit
             System.Windows.Forms.Button browseFolderButton;
             System.Windows.Forms.Label filterLabel;
             System.Windows.Forms.Button filterButton;
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MiniserverForm));
+            System.Windows.Forms.Button convertButton;
+            System.Windows.Forms.Button deleteButton;
             this._urlTextBox = new System.Windows.Forms.TextBox();
             this._folderTextBox = new System.Windows.Forms.TextBox();
             this._dataGridView = new System.Windows.Forms.DataGridView();
@@ -78,6 +80,8 @@ namespace LoxStatEdit
             browseFolderButton = new System.Windows.Forms.Button();
             filterLabel = new System.Windows.Forms.Label();
             filterButton = new System.Windows.Forms.Button();
+            convertButton = new System.Windows.Forms.Button();
+            deleteButton = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this._dataGridView)).BeginInit();
             this.SuspendLayout();
             // 
@@ -128,10 +132,10 @@ namespace LoxStatEdit
             // downloadButton
             // 
             downloadButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            downloadButton.Location = new System.Drawing.Point(729, 527);
+            downloadButton.Location = new System.Drawing.Point(507, 527);
             downloadButton.Margin = new System.Windows.Forms.Padding(6);
             downloadButton.Name = "downloadButton";
-            downloadButton.Size = new System.Drawing.Size(111, 23);
+            downloadButton.Size = new System.Drawing.Size(110, 23);
             downloadButton.TabIndex = 9;
             downloadButton.Text = "&Download selected";
             this.toolTip.SetToolTip(downloadButton, "Download selected statistic files (ALT + D)");
@@ -141,10 +145,10 @@ namespace LoxStatEdit
             // uploadButton
             // 
             uploadButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            uploadButton.Location = new System.Drawing.Point(846, 527);
+            uploadButton.Location = new System.Drawing.Point(624, 527);
             uploadButton.Margin = new System.Windows.Forms.Padding(6);
             uploadButton.Name = "uploadButton";
-            uploadButton.Size = new System.Drawing.Size(111, 23);
+            uploadButton.Size = new System.Drawing.Size(105, 23);
             uploadButton.TabIndex = 10;
             uploadButton.Text = "&Upload selected";
             this.toolTip.SetToolTip(uploadButton, "Upload selected statistic files (ALT + U)");
@@ -289,8 +293,8 @@ namespace LoxStatEdit
             // _yearMonthCol
             // 
             this._yearMonthCol.DataPropertyName = "YearMonth";
-            dataGridViewCellStyle2.Format = "yyyy-MM";
-            this._yearMonthCol.DefaultCellStyle = dataGridViewCellStyle2;
+            dataGridViewCellStyle8.Format = "yyyy-MM";
+            this._yearMonthCol.DefaultCellStyle = dataGridViewCellStyle8;
             this._yearMonthCol.HeaderText = "Year/Month";
             this._yearMonthCol.MinimumWidth = 10;
             this._yearMonthCol.Name = "_yearMonthCol";
@@ -421,8 +425,9 @@ namespace LoxStatEdit
             // 
             // progressBar
             // 
-            this.progressBar.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.progressBar.Location = new System.Drawing.Point(563, 527);
+            this.progressBar.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.progressBar.Location = new System.Drawing.Point(337, 527);
             this.progressBar.Margin = new System.Windows.Forms.Padding(6);
             this.progressBar.Name = "progressBar";
             this.progressBar.Size = new System.Drawing.Size(160, 23);
@@ -430,10 +435,11 @@ namespace LoxStatEdit
             // 
             // progressLabel
             // 
-            this.progressLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.progressLabel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.progressLabel.AutoSize = true;
             this.progressLabel.BackColor = System.Drawing.Color.Transparent;
-            this.progressLabel.Location = new System.Drawing.Point(568, 532);
+            this.progressLabel.Location = new System.Drawing.Point(342, 532);
             this.progressLabel.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.progressLabel.Name = "progressLabel";
             this.progressLabel.Size = new System.Drawing.Size(24, 13);
@@ -452,11 +458,39 @@ namespace LoxStatEdit
             this._clearFilterButton.UseVisualStyleBackColor = true;
             this._clearFilterButton.Click += new System.EventHandler(this.ClearFilterButton_Click);
             // 
+            // convertButton
+            // 
+            convertButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            convertButton.Location = new System.Drawing.Point(736, 527);
+            convertButton.Margin = new System.Windows.Forms.Padding(6);
+            convertButton.Name = "convertButton";
+            convertButton.Size = new System.Drawing.Size(110, 23);
+            convertButton.TabIndex = 107;
+            convertButton.Text = "&Convert selected...";
+            this.toolTip.SetToolTip(convertButton, "Convert selected statistic files (ALT + C)");
+            convertButton.UseVisualStyleBackColor = true;
+            convertButton.Click += new System.EventHandler(this.ConvertButton_Click);
+            // 
+            // deleteButton
+            // 
+            deleteButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            deleteButton.Location = new System.Drawing.Point(853, 527);
+            deleteButton.Margin = new System.Windows.Forms.Padding(6);
+            deleteButton.Name = "deleteButton";
+            deleteButton.Size = new System.Drawing.Size(105, 23);
+            deleteButton.TabIndex = 108;
+            deleteButton.Text = "Dele&te selected...";
+            this.toolTip.SetToolTip(deleteButton, "Delete selected statistic files (ALT + T)");
+            deleteButton.UseVisualStyleBackColor = true;
+            deleteButton.Click += new System.EventHandler(this.DeleteButton_Click);
+            // 
             // MiniserverForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(969, 561);
+            this.Controls.Add(convertButton);
+            this.Controls.Add(deleteButton);
             this.Controls.Add(this._clearFilterButton);
             this.Controls.Add(this._filterComboBox);
             this.Controls.Add(filterButton);

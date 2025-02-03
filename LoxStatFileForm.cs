@@ -492,15 +492,7 @@ namespace LoxStatEdit
 
             // insert one row above the selected row (only one row is allowed to be selected)
             Cursor = Cursors.WaitCursor;
-
-            string chrDec = CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator;
-            string chrGrp = CultureInfo.CurrentCulture.NumberFormat.NumberGroupSeparator;
             
-            double myValue;
-            string formula = "";
-            bool isFormula = true;
-
-
             // Problem: SelectedRows is not sorted, so SelectedRows[0] can be the highest row that is selected!
             // int rowIndex = _dataGridView.SelectedRows[0].Index;
             int firstSelectedRowIndex = _dataGridView.Rows.Count;

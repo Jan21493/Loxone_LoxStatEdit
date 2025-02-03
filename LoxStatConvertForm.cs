@@ -52,25 +52,26 @@ namespace LoxStatEdit {
                 get; set;
             }
 
-            /// <summary>This property retrieves the latest year and month where a statistics file with this UUID is available.
+            /// <summary>This property retrieves and sets the latest year and month where a statistics file with this UUID is available.
             /// </summary>
             public DateTime LatestYearMonth {
                 get; set;
             }
 
-            /// <summary>This property retrieves the number of values (columns) that are stored for each data point (timestamp) the statistics file.
+            /// <summary>This property retrieves and sets the associated file item array of the statistics file. For each UUID up to 10 files are technically available: without _, _1, _2, ... , _9
             /// </summary>
-            public ushort[] ValueCount {
-                get; set; 
+            public MiniserverForm.FileItem[] FileItem {
+                get; set;
             }
 
-            /// <summary>Statistics files with new style use an underscore with number as an identifier.
+
+            /// <summary>Statistics files with new style use an underscore with number as an identifier and are stored in FileItem[1-9]
             /// </summary>
             public bool IsNewFormat {
                 get {
-                    // va
-                    for (var i = 1; i < 10; i++)
-                        if (ValueCount[i] > 0)
+                    if (FileItem != null)
+                        for (var i = 1; i < 10; i++)
+                        if (FileItem[i] != null)
                             return true;
                     return false;   
                 }
@@ -101,7 +102,6 @@ namespace LoxStatEdit {
 
         private void MainForm_Load(object sender, EventArgs e) {
 
-            Console.WriteLine("Start ...");
             // ToDo: handle multiple files - so far only _fileItem is assumed (one fileItem)
             if ((_fileItem != null) && (_fileItem.FileName.Length > 0)) {
 
@@ -124,17 +124,16 @@ namespace LoxStatEdit {
                 }
             }
 
-            Console.WriteLine("Build Loxone function blocks ... ");
             // create a list of Loxone function blocks with UUID, description from latest file
             loxFunctionBlocks = new List<LoxFunctionBlock>();
             LoxFunctionBlock defaultLoxFunctionBlock = new LoxFunctionBlock {
                 UUID = "",
                 LatestDescription = "",
-                LatestYearMonth = new DateTime(),
-                ValueCount = new ushort[10]
+                FileItem = new MiniserverForm.FileItem[10],
+                LatestYearMonth = new DateTime()
             };
 
-            // fill list of Loxone function blocks from all files in the list
+            // build a list of Loxone function blocks from all files in the list - only look on filename to be fast
             foreach (FileItem fileItem in _fileItems) {
                 // only add valid UUIDs to list
                 if (fileItem.IsValidMsStatsFile) {
@@ -144,38 +143,43 @@ namespace LoxStatEdit {
                     if (loxFunctionBlock == null) {
                         loxFunctionBlock = new LoxFunctionBlock {
                             UUID = fileItem.UUID,
-                            LatestDescription = fileItem.Description,
-                            LatestYearMonth = fileItem.YearMonth,
-                            ValueCount = new ushort[10]
+                            LatestDescription = "Not available",
+                            FileItem = new MiniserverForm.FileItem[10],
+                            LatestYearMonth = fileItem.YearMonth
                         };
-                        loxFunctionBlock.ValueCount[fileItem.msStatsType] = fileItem.ValueCount;
+                        loxFunctionBlock.FileItem[fileItem.msStatsType] = fileItem;
                         loxFunctionBlocks.Add(loxFunctionBlock);
-                    } else {  // UUID was found, but description might be newer
+                    } else {  // UUID was found, but statistics file might be from a newer month (yyyyMM)
                         if (fileItem.YearMonth > loxFunctionBlock.LatestYearMonth) {
                             loxFunctionBlock.LatestYearMonth = fileItem.YearMonth;
-                            loxFunctionBlock.LatestDescription = fileItem.Description;
+                            loxFunctionBlock.FileItem = new MiniserverForm.FileItem[10];
+                            loxFunctionBlock.FileItem[fileItem.msStatsType] = fileItem;
+                        } else if (fileItem.YearMonth == loxFunctionBlock.LatestYearMonth) {
+                            // or from the same (latest) month
+                            loxFunctionBlock.FileItem[fileItem.msStatsType] = fileItem;
                         }
-                        // there might be more files with same UUID for new style meters (with '_#'), take number of values from latest file
-                        if (fileItem.YearMonth >= loxFunctionBlock.LatestYearMonth) {
-                            loxFunctionBlock.ValueCount[fileItem.msStatsType] = fileItem.ValueCount;
-                        }
+
                     }
                 }
             } // end foreach
 
-            Console.WriteLine("Building list ... ");
-            // create a drop-down list with UUIDs for function blocks with new format (with _ in filename)
             uuidComboBox.Items.Clear();
-            foreach (LoxFunctionBlock loxFunctionBlock in loxFunctionBlocks) {
-                if (loxFunctionBlock.IsNewFormat)
-                    uuidComboBox.Items.Add(loxFunctionBlock.UUID + " - " + loxFunctionBlock.LatestDescription);
-            }
-            // disable "convert old format to new" if the file already has the new format 
-            if (_fileItem.msStatsType > 0)
+           // disable "convert old format to new" if the file already has the new format 
+            if (_fileItem.msStatsType > 0) {
                 convertOldRadioButton.Enabled = false;
+            } else {
+                // create a drop-down list with UUIDs for function blocks with new meter style, but currently only for uni- and bidirectional meters
+                // those meters have _1 and _2 file data, but no _3 (used for storage meters)
+                foreach (LoxFunctionBlock loxFunctionBlock in loxFunctionBlocks) {
+                    if ((loxFunctionBlock.FileItem[1] != null) &&
+                        (loxFunctionBlock.FileItem[2] != null) &&
+                        (loxFunctionBlock.FileItem[3] == null))
+                        uuidComboBox.Items.Add(loxFunctionBlock.UUID + " - " + loxFunctionBlock.FileItem[2].Description);
+                }
+            }
 
-            // get file info text from latest file (highest yyyyMM)
-            string newDescription = loxFunctionBlocks.FirstOrDefault(item => item.UUID == _fileItem.UUID)?.LatestDescription;
+            // get file info text from latest file (highest yyyyMM) for this UUID
+            string newDescription = loxFunctionBlocks.FirstOrDefault(item => item.UUID == _fileItem.UUID)?.FileItem[_fileItem.msStatsType].Description;
             if (newDescription.Length > 200)
                 newDescription = newDescription.Substring(0, 200);
             newDescriptionTextBox.Text = newDescription;
@@ -197,8 +201,6 @@ namespace LoxStatEdit {
             overwriteCheckBox.Enabled = false;
             modifyIntervalGroupBox.Enabled = false;
             newIntervalComboBox.Enabled = false;
-
-            Console.WriteLine("Initializing finished ");
         }
 
         private void Form_Resize(object sender, EventArgs e) {
@@ -241,7 +243,7 @@ namespace LoxStatEdit {
                     return 1;
                 }
                 // _newLoxStatFile is filled properly. Quit if ValueCount differs
-                if ((_newLoxStatFile != null) && (_newLoxStatFile.ValueCount != loxFunctionBlock.ValueCount[fileNo]))
+                if ((_newLoxStatFile != null) && (_newLoxStatFile.ValueCount != loxFunctionBlock.FileItem[fileNo].ValueCount))
                     return 2;
             } else if (newFileExists) {
                 // error - new file exists, but overwrite is not allowed
@@ -252,7 +254,7 @@ namespace LoxStatEdit {
                     FileName = newFileName,
                     Guid = new Guid(),
                     Text = loxFunctionBlock.LatestDescription,
-                    ValueCount = loxFunctionBlock.ValueCount[fileNo],
+                    ValueCount = loxFunctionBlock.FileItem[fileNo].ValueCount,
                     Unknown0x02 = _loxStatFile.Unknown0x02,
                     Unknown0x04 = _loxStatFile.Unknown0x04,
                     TextTerminator = _loxStatFile.TextTerminator
@@ -472,7 +474,7 @@ namespace LoxStatEdit {
             // write meter reading data to _2 file
 
             // if the new meter only has one column (consumption), column is automatically adjusted from feed to consumption
-            if (valueIndex + 1 > loxFunctionBlock.ValueCount[2])
+            if (valueIndex + 1 > loxFunctionBlock.FileItem[2].ValueCount)
                 valueIndex = 0;
             errorCode = WriteNewFile(2, fileItem, allowOverwrite, loxFunctionBlock, meterIntervalComboBox.SelectedIndex, valueIndex);
             Console.WriteLine("Error code for _2 : {0} ", errorCode);
@@ -628,10 +630,6 @@ namespace LoxStatEdit {
                 this.Close();
         }
 
-        private void changeIntervalLabel_Click(object sender, EventArgs e) {
-
-        }
-
         private void label4_Click(object sender, EventArgs e) {
 
         }
@@ -644,23 +642,11 @@ namespace LoxStatEdit {
 
         }
 
-        private void changeIntervalPowerlabel_Click(object sender, EventArgs e) {
-
-        }
-
         private void toolTip_Popup(object sender, PopupEventArgs e) {
 
         }
 
-        private void selectUUIDlabel_Click(object sender, EventArgs e) {
-
-        }
-
         private void selectValueRadioButton_CheckedChanged(object sender, EventArgs e) {
-
-        }
-
-        private void writeValuelabel_Click(object sender, EventArgs e) {
 
         }
 
@@ -715,14 +701,6 @@ namespace LoxStatEdit {
                 modifyIntervalGroupBox.Enabled = true;
                 newIntervalComboBox.Enabled = true;
             }
-
-        }
-
-        private void label1_Click(object sender, EventArgs e) {
-
-        }
-
-        private void fileNameLabel_Click(object sender, EventArgs e) {
 
         }
 

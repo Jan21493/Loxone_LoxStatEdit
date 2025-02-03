@@ -10,32 +10,27 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static LoxStatEdit.MiniserverForm;
 
 namespace LoxStatEdit
 {
-    public partial class MiniserverForm: Form
-    {
+    public partial class MiniserverForm : Form {
 
         #region class FileItem
-        public class FileItem: IComparable<FileItem>
-        {
+        public class FileItem : IComparable<FileItem> {
             internal MsFileInfo MsFileInfo;
             internal FileInfo FileInfo;
-            private string _name; 
+            private string _name;
             private string _description;
             private ushort _valueCount;
 
-            public string FileName
-            {
-                get
-                {
+            public string FileName {
+                get {
                     return (MsFileInfo != null) ? MsFileInfo.FileName : FileInfo.Name;
                 }
             }
-            public bool IsValidMsStatsFile
-            {
-                get
-                {
+            public bool IsValidMsStatsFile {
+                get {
                     var fileName = (MsFileInfo != null) ? MsFileInfo.FileName : FileInfo.Name;
 
                     // verify if file has valid Loxone stats format with UUID and .yyyyMM extension
@@ -51,15 +46,13 @@ namespace LoxStatEdit
                     var validFormat = false;
                     if (result.Success)
                         validFormat = true;
-                    
+
                     return (validFormat);
                 }
             }
 
-            public ushort msStatsType
-            {
-                get
-                {
+            public ushort msStatsType {
+                get {
                     var fileName = (MsFileInfo != null) ? MsFileInfo.FileName : FileInfo.Name;
 
                     // get the type from the file name after UUID and _ 
@@ -75,10 +68,8 @@ namespace LoxStatEdit
                 }
             }
 
-            public string UUID
-            {
-                get
-                {
+            public string UUID {
+                get {
                     var fileName = (MsFileInfo != null) ? MsFileInfo.FileName : FileInfo.Name;
 
                     // verify if file has valid Loxone stats format with UUID and .yyyyMM extension
@@ -88,71 +79,54 @@ namespace LoxStatEdit
                     var result = Regex.Match(fileName, pattern);
                     var groups = result.Groups;
                     // no further evaluation of Regex so far
-                    if (result.Success && groups.Count > 1)
-                    {
+                    if (result.Success && groups.Count > 1) {
                         return groups[1].Value;
-                    } 
-                    else
-                    {
+                    } else {
                         return "Filename is not a valid UUID. Maybe corrupted?";
                     }
                 }
             }
-            public string Name
-            {
-                get
-                {
-                    if(_name == null)
-                    {
-                        try
-                        {
-                            if (FileInfo != null)
-                            {
+            public string Name {
+                get {
+                    if (_name == null) {
+                        try {
+                            if (FileInfo != null) {
                                 _name = LoxStatFile.Load(FileInfo.FullName, true).Text;
-                                
+
                                 // Append the file extension as a suffix could be _1.202407 or 202407
                                 // This is a workaround until the sorting on two levels is implemented
                                 // e.g. sort by description and then by filename, else the files are not in historical order
                                 _name += " [";
 
                                 // check if filename contains _
-                                if (FileInfo.Name.Contains('_'))
-                                {
+                                if (FileInfo.Name.Contains('_')) {
                                     _name += FileInfo.Name.Substring(FileInfo.Name.IndexOf('_') + 1);
-                                }
-                                else { 
+                                } else {
                                     _name += FileInfo.Name.Substring(FileInfo.Name.Length - 6);
                                 }
 
                                 _name += "]";
                             }
                         }
-                        catch(Exception)
-                        {
+                        catch (Exception) {
                             _name = null;
                         }
-                        if(string.IsNullOrEmpty(_name))
+                        if (string.IsNullOrEmpty(_name))
                             //_name = FileName;
                             _name = "Download to view description";
                     }
                     return _name;
                 }
             }
-            public string Description
-            {
-                get
-                {
-                    if (_description == null)
-                    {
-                        try
-                        {
-                            if (FileInfo != null)
-                            {
+            public string Description {
+                get {
+                    if (_description == null) {
+                        try {
+                            if (FileInfo != null) {
                                 _description = LoxStatFile.Load(FileInfo.FullName, true).Text;
                             }
                         }
-                        catch (Exception)
-                        {
+                        catch (Exception) {
                             _description = null;
                         }
                         if (string.IsNullOrEmpty(_description))
@@ -183,26 +157,20 @@ namespace LoxStatEdit
             }
 
 
-            public DateTime YearMonth
-            {
-                get
-                {
+            public DateTime YearMonth {
+                get {
                     return LoxStatFile.GetYearMonth(FileName);
                 }
             }
 
-            public DateTime DateModified
-            {
-                get
-                {
+            public DateTime DateModified {
+                get {
                     return (FileInfo != null) ? FileInfo.LastWriteTime : MsFileInfo.Date;
                 }
             }
 
-            public long Size
-            {
-                get
-                {
+            public long Size {
+                get {
                     return (FileInfo != null) ? FileInfo.Length : MsFileInfo.Size;
                 }
             }
@@ -220,46 +188,35 @@ namespace LoxStatEdit
             public const int IDStatusLargerOnFS = 6;
 
             public const int IDStatusSame = 7;
-            public int Status
-            {
-                get
-                {
-                    if (FileInfo == null)
-                    {
+            public int Status {
+                get {
+                    if (FileInfo == null) {
                         return IDStatusOnlyOnMS;
                     }
-                    if (MsFileInfo == null)
-                    {
+                    if (MsFileInfo == null) {
                         return IDStatusOnlyOnFS;
                     }
-                    if (FileInfo.LastWriteTime < MsFileInfo.Date)
-                    {
+                    if (FileInfo.LastWriteTime < MsFileInfo.Date) {
                         return IDStatusNewerOnMS;
                     }
-                    if (FileInfo.LastWriteTime > MsFileInfo.Date)
-                    {
+                    if (FileInfo.LastWriteTime > MsFileInfo.Date) {
                         return IDStatusNewerOnFS;
                     }
-                    if (FileInfo.Length < MsFileInfo.Size)
-                    {
+                    if (FileInfo.Length < MsFileInfo.Size) {
                         return IDStatusLargerOnMS;
                     }
-                    if (FileInfo.Length > MsFileInfo.Size)
-                    {
+                    if (FileInfo.Length > MsFileInfo.Size) {
                         return IDStatusLargerOnFS;
                     }
                     return IDStatusSame;
                 }
             }
 
-            public string StatusString
-            {
-                get
-                {
+            public string StatusString {
+                get {
                     string statusString;
 
-                    switch (Status)
-                    {
+                    switch (Status) {
                         case IDStatusOnlyOnMS:
                             statusString = "Only on MS";
                             break;
@@ -283,18 +240,16 @@ namespace LoxStatEdit
                             statusString = "Same date/size";
                             break;
                     }
-                    
+
                     return statusString;
                 }
             }
 
-            public override string ToString()
-            {
+            public override string ToString() {
                 return string.Format("{0} ({1})", Name, StatusString);
             }
 
-            public int CompareTo(FileItem other)
-            {
+            public int CompareTo(FileItem other) {
                 var c = StringComparer.OrdinalIgnoreCase.Compare(Name, other.Name);
                 return (c != 0) ? c : YearMonth.CompareTo(other.YearMonth);
             }
@@ -311,8 +266,7 @@ namespace LoxStatEdit
         #endregion
 
         #region Constructor
-        public MiniserverForm(params string[] args)
-        {
+        public MiniserverForm(params string[] args) {
             _args = args;
             InitializeComponent();
 
@@ -324,8 +278,7 @@ namespace LoxStatEdit
 
         #region Methods
 
-        private void RefreshGridView()
-        {
+        private void RefreshGridView() {
             // Show the loading form
             var busyForm = new BusyForm {
                 // Manually set the start position
@@ -337,8 +290,7 @@ namespace LoxStatEdit
             busyForm.Show(this); // Or busyForm.ShowDialog(this) for a modal form
             Application.DoEvents(); // Process events to ensure the loading form is displayed
 
-            try
-            {
+            try {
                 // Save the current sort conditions
                 var sortColumn = _dataGridView.SortedColumn;
                 var sortOrder = _dataGridView.SortOrder;
@@ -367,9 +319,9 @@ namespace LoxStatEdit
                 // Clear existing columns
                 _dataGridView.Columns.Clear();
 
-				// Add Cell Formatting
+                // Add Cell Formatting
                 _dataGridView.CellFormatting += DataGridView_CellFormatting;
-                
+
                 // Add Tool Tips
                 _dataGridView.CellToolTipTextNeeded += DataGridView_CellToolTipTextNeeded;
 
@@ -378,7 +330,7 @@ namespace LoxStatEdit
                     DataPropertyName = "FileName",
                     HeaderText = "FileName",
                     Width = 250,
-                    ToolTipText = "Name of the file on the Loxone MS and local file system (FS).\n"+
+                    ToolTipText = "Name of the file on the Loxone MS and local file system (FS).\n" +
                         "NOTE: This is typically an UUID plus extension with .yyyyMM",
                 });
                 _dataGridView.Columns.Add(new DataGridViewTextBoxColumn {
@@ -386,26 +338,24 @@ namespace LoxStatEdit
                     HeaderText = "Description",
                     MinimumWidth = 250,
                     ToolTipText = "Defined in Loxone Config and retrieved from statistics data.",
-                    AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill, 
+                    AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill,
                 });
-                _dataGridView.Columns.Add(new DataGridViewTextBoxColumn
-                {
+                _dataGridView.Columns.Add(new DataGridViewTextBoxColumn {
                     DataPropertyName = "YearMonth",
                     HeaderText = "Year/Month",
                     Width = 90,
-                    ToolTipText = "Year and month from file extension on MS. \n"+
+                    ToolTipText = "Year and month from file extension on MS. \n" +
                         "NOTE: This date is used on MS to fetch statistics data from a specific year and month.",
                     DefaultCellStyle = { Format = "yyyy-MM" }
                 });
-                _dataGridView.Columns.Add(new DataGridViewTextBoxColumn
-                {
+                _dataGridView.Columns.Add(new DataGridViewTextBoxColumn {
                     DataPropertyName = "DateModified",
                     HeaderText = "Date modified",
                     Width = 120,
-                    ToolTipText = "Date and time when the file was modified.\n\nThe date and time is from the local file system (FS), if the file is found there.\n"+
-                        "If the file is not found on the local FS,\nit's the date and time that is received from the MS via FTP.\n"+
-                        "If there is any difference the 'status' column will give you more information.\n\n"+
-                        "NOTE: files that were downloaded via FTP always have a date with this or last year.\n"+
+                    ToolTipText = "Date and time when the file was modified.\n\nThe date and time is from the local file system (FS), if the file is found there.\n" +
+                        "If the file is not found on the local FS,\nit's the date and time that is received from the MS via FTP.\n" +
+                        "If there is any difference the 'status' column will give you more information.\n\n" +
+                        "NOTE: files that were downloaded via FTP always have a date with this or last year.\n" +
                         "The reason is that the Loxone MS does not transmit any year in directory listings via FTP.",
                     DefaultCellStyle = { Format = "dd.MM.yyyy - HH:mm:ss" }
                 });
@@ -413,13 +363,12 @@ namespace LoxStatEdit
                     DataPropertyName = "Size",
                     HeaderText = "Size",
                     Width = 90,
-                    ToolTipText = "Size of the file on the local file system (FS) or MS.\n\n"+
-                        "The size is from the local FS, if the file is found there.\n"+
-                        "If the file is not found on the local FS,\\nit's the size that is received from the MS via FTP.\n"+
-                        "If there is any difference for files with same modification date/time,\n"+
+                    ToolTipText = "Size of the file on the local file system (FS) or MS.\n\n" +
+                        "The size is from the local FS, if the file is found there.\n" +
+                        "If the file is not found on the local FS,\\nit's the size that is received from the MS via FTP.\n" +
+                        "If there is any difference for files with same modification date/time,\n" +
                         "the 'status' column will give you more information.",
-                    DefaultCellStyle = new DataGridViewCellStyle()
-                    {
+                    DefaultCellStyle = new DataGridViewCellStyle() {
                         Alignment = DataGridViewContentAlignment.MiddleRight,
                         ForeColor = System.Drawing.Color.Black
                     },
@@ -430,8 +379,7 @@ namespace LoxStatEdit
                     HeaderText = "Status",
                     Width = 100,
                     ToolTipText = "Result of a comparison between the file on Loxone MS and local file system (FS).",
-                    DefaultCellStyle = new DataGridViewCellStyle()
-                    {
+                    DefaultCellStyle = new DataGridViewCellStyle() {
                         BackColor = System.Drawing.Color.White,
                         ForeColor = System.Drawing.Color.Black
                     },
@@ -471,8 +419,7 @@ namespace LoxStatEdit
                 _dataGridView.DataSource = _fileItems;
 
                 // Restore the sort conditions
-                if (sortColumn != null && sortOrder != SortOrder.None)
-                {
+                if (sortColumn != null && sortOrder != SortOrder.None) {
                     // Determine the ListSortDirection from the SortOrder
                     ListSortDirection direction = sortOrder == SortOrder.Ascending ? ListSortDirection.Ascending : ListSortDirection.Descending;
 
@@ -483,16 +430,14 @@ namespace LoxStatEdit
 
                     // TODO: Add second sort level, to always sort by FileName as second level with same direction as first level
 
-                    if (columnToSort != null)
-                    {
+                    if (columnToSort != null) {
                         // Reapply the sort
                         _dataGridView.Sort(columnToSort, direction);
                     }
                 }
 
                 // Restore the scrolling position
-                if (_dataGridView.RowCount > 0 && scrollPosition != -1 && scrollPosition < _dataGridView.RowCount)
-                {
+                if (_dataGridView.RowCount > 0 && scrollPosition != -1 && scrollPosition < _dataGridView.RowCount) {
                     _dataGridView.FirstDisplayedScrollingRowIndex = scrollPosition;
                 }
 
@@ -502,32 +447,26 @@ namespace LoxStatEdit
                 // Restore the CurrentCell to restore the selection arrow
                 if (activeCellRowIndex.HasValue && activeCellColumnIndex.HasValue
                     && activeCellRowIndex.Value < _dataGridView.RowCount
-                    && activeCellColumnIndex.Value < _dataGridView.ColumnCount)
-                {
+                    && activeCellColumnIndex.Value < _dataGridView.ColumnCount) {
                     _dataGridView.CurrentCell = _dataGridView.Rows[activeCellRowIndex.Value].Cells[activeCellColumnIndex.Value];
                 }
 
                 // Restore the selection
-                if (selectedCells.Any())
-                {
-                    foreach (var cell in selectedCells)
-                    {
-                        if (cell.RowIndex < _dataGridView.RowCount && cell.ColumnIndex < _dataGridView.ColumnCount)
-                        {
+                if (selectedCells.Any()) {
+                    foreach (var cell in selectedCells) {
+                        if (cell.RowIndex < _dataGridView.RowCount && cell.ColumnIndex < _dataGridView.ColumnCount) {
                             _dataGridView.Rows[cell.RowIndex].Cells[cell.ColumnIndex].Selected = true;
                         }
                     }
                 }
             }
-            finally
-            {
+            finally {
                 // Close the loading form after the loop
                 busyForm.Close();
             }
         }
 
-        private void BrowseFolderButton_Click(object sender, EventArgs e)
-        {
+        private void BrowseFolderButton_Click(object sender, EventArgs e) {
             folderBrowserDialog.SelectedPath = _folderTextBox.Text;
             if (folderBrowserDialog.ShowDialog(this) == DialogResult.OK)
                 _folderTextBox.Text = folderBrowserDialog.SelectedPath;
@@ -536,8 +475,7 @@ namespace LoxStatEdit
             //Console.WriteLine("Refreshed local folder");
         }
 
-        private void openFolderButton_Click(object sender, EventArgs e)
-        {
+        private void openFolderButton_Click(object sender, EventArgs e) {
             Process.Start("explorer.exe", _folderTextBox.Text);
         }
 
@@ -587,7 +525,8 @@ namespace LoxStatEdit
             foreach (FileInfo file in _localFolder) {
                 FileItem fileItem = new FileItem {
                     MsFileInfo = null,
-                    FileInfo = file };
+                    FileInfo = file
+                };
                 if (fileItem.FileName.ToLower().Contains(filterText) || fileItem.Name.ToLower().Contains(filterText))
                     fileItems.Add(fileItem);
             }
@@ -607,10 +546,8 @@ namespace LoxStatEdit
                 Select(fileName => new FileInfo(fileName)).ToList();
         }
 
-        private UriBuilder GetMsUriBuilder()
-        {
-            try
-            {
+        private UriBuilder GetMsUriBuilder() {
+            try {
                 // escape # in uri by replacing with hex
                 var uriBuilder = new UriBuilder(new Uri(_urlTextBox.Text.Replace("#", "%23")).
                     GetComponents(UriComponents.Scheme | UriComponents.UserInfo |
@@ -619,8 +556,7 @@ namespace LoxStatEdit
                 };
                 return uriBuilder;
             }
-            catch (UriFormatException ex)
-            {
+            catch (UriFormatException ex) {
                 MessageBox.Show(ex.Message, "Error - UriBuilder", MessageBoxButtons.OK, MessageBoxIcon.Error);
 
                 return null;
@@ -628,25 +564,22 @@ namespace LoxStatEdit
         }
 
 
-        private Uri GetFileNameUri(string fileName)
-        {
+        private Uri GetFileNameUri(string fileName) {
             var uriBuilder = GetMsUriBuilder();
             uriBuilder.Path += "/" + fileName;
             return uriBuilder.Uri;
         }
 
-        private bool Download(FileItem fileItem)
-        {
-            try
-            {
+        private bool Download(FileItem fileItem) {
+            try {
                 var ftpWebRequest = (FtpWebRequest)FtpWebRequest.
                 Create(GetFileNameUri(fileItem.FileName));
                 ftpWebRequest.Method = WebRequestMethods.Ftp.DownloadFile;
                 var targetFileName = Path.Combine(_folderTextBox.Text, fileItem.FileName);
-                using(var response = ftpWebRequest.GetResponse())
-                using(var ftpStream = response.GetResponseStream())
-                using(var fileStream = File.OpenWrite(targetFileName))
-                ftpStream.CopyTo(fileStream);                
+                using (var response = ftpWebRequest.GetResponse())
+                using (var ftpStream = response.GetResponseStream())
+                using (var fileStream = File.OpenWrite(targetFileName))
+                    ftpStream.CopyTo(fileStream);
                 File.SetLastWriteTime(targetFileName, fileItem.MsFileInfo.Date);
 
                 // Log FTP output
@@ -654,69 +587,59 @@ namespace LoxStatEdit
 
                 return true;
             }
-            catch (WebException ex)
-            {
+            catch (WebException ex) {
                 FtpWebResponse response = ex.Response as FtpWebResponse;
-                if (response != null)
-                {
+                if (response != null) {
                     MessageBox.Show(ex.Message, "Error  - FTP connection", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
 
                 return false;
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"# Message\n{ex.Message}\n\n# Data\n{ex.Data}\n\n# StackTrace\n{ex.StackTrace}", 
+            catch (Exception ex) {
+                MessageBox.Show($"# Message\n{ex.Message}\n\n# Data\n{ex.Data}\n\n# StackTrace\n{ex.StackTrace}",
                     "Error - IList", MessageBoxButtons.OK, MessageBoxIcon.Error);
 
                 return false;
             }
         }
 
-        private bool Upload(FileItem fileItem)
-        {
-            try
-            {
+        private bool Upload(FileItem fileItem) {
+            try {
                 var ftpWebRequest = (FtpWebRequest)FtpWebRequest.Create(GetFileNameUri(fileItem.FileName));
                 ftpWebRequest.Method = WebRequestMethods.Ftp.UploadFile;
                 using (var fileStream = File.OpenRead(
                     Path.Combine(_folderTextBox.Text, fileItem.FileInfo.FullName)))
                 using (var ftpStream = ftpWebRequest.GetRequestStream())
                     fileStream.CopyTo(ftpStream);
-                using (var response = ftpWebRequest.GetResponse()) { }
+                using (var response = ftpWebRequest.GetResponse()) {
+                }
 
                 return true;
             }
-            catch (WebException ex)
-            {
+            catch (WebException ex) {
                 var response = ex.Response as FtpWebResponse;
-                if (response != null)
-                {
+                if (response != null) {
                     MessageBox.Show(ex.Message, "Error  - FTP connection", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
 
                 return false;
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"# Message\n{ex.Message}\n\n# Data\n{ex.Data}\n\n# StackTrace\n{ex.StackTrace}", 
+            catch (Exception ex) {
+                MessageBox.Show($"# Message\n{ex.Message}\n\n# Data\n{ex.Data}\n\n# StackTrace\n{ex.StackTrace}",
                     "Error - IList", MessageBoxButtons.OK, MessageBoxIcon.Error);
 
                 return false;
             }
         }
 
-        private bool Convert(FileItem fileItem)
-        {
+        private bool Convert(FileItem fileItem) {
             // ToDo: Code missing
             // System.Threading.Thread.Sleep(50);
             return true;
         }
 
-        private bool Delete(FileItem fileItem)
-        {
-            try
-            {
+        private bool Delete(FileItem fileItem) {
+            try {
                 // Delete file on Loxone MS
                 if (fileItem.MsFileInfo != null) {
                     FtpWebRequest ftpWebRequest = (FtpWebRequest)WebRequest.Create(GetFileNameUri(fileItem.FileName));
@@ -734,19 +657,16 @@ namespace LoxStatEdit
 
                 return true;
             }
-            catch (WebException ex)
-            {
+            catch (WebException ex) {
                 var response = ex.Response as FtpWebResponse;
-                if (response != null)
-                {
+                if (response != null) {
                     MessageBox.Show(ex.Message, "Error  - FTP connection", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
 
                 return false;
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"# Message\n{ex.Message}\n\n# Data\n{ex.Data}\n\n# StackTrace\n{ex.StackTrace}", 
+            catch (Exception ex) {
+                MessageBox.Show($"# Message\n{ex.Message}\n\n# Data\n{ex.Data}\n\n# StackTrace\n{ex.StackTrace}",
                     "Error - local file system", MessageBoxButtons.OK, MessageBoxIcon.Error);
 
                 return false;
@@ -755,20 +675,17 @@ namespace LoxStatEdit
         #endregion
 
         #region Events
-        private void RefreshMsButton_Click(object sender, EventArgs e)
-        {
+        private void RefreshMsButton_Click(object sender, EventArgs e) {
             RefreshMs();
             RefreshGridView();
         }
 
-        private void RefreshFolderButton_Click(object sender, EventArgs e)
-        {
+        private void RefreshFolderButton_Click(object sender, EventArgs e) {
             RefreshLocal();
             RefreshGridView();
         }
 
-        private void FilterButton_Click(object sender, EventArgs e)
-        {
+        private void FilterButton_Click(object sender, EventArgs e) {
             if (_filterComboBox.FindStringExact(_filterComboBox.Text.ToLower()) == -1)
                 _filterComboBox.Items.Add(_filterComboBox.Text.ToLower());
             RefreshGridView();
@@ -781,43 +698,35 @@ namespace LoxStatEdit
         }
 
 
-        private void _urlTextBox_KeyDown(object sender, System.Windows.Forms.KeyEventArgs e)
-        {
-            if (e.KeyCode == Keys.Enter && !string.IsNullOrWhiteSpace(_folderTextBox.Text))
-            {
+        private void _urlTextBox_KeyDown(object sender, System.Windows.Forms.KeyEventArgs e) {
+            if (e.KeyCode == Keys.Enter && !string.IsNullOrWhiteSpace(_folderTextBox.Text)) {
                 RefreshMsButton_Click(sender, e);
                 e.Handled = true;
                 e.SuppressKeyPress = true;
             }
         }
 
-        private void _folderTextBox_KeyDown(object sender, System.Windows.Forms.KeyEventArgs e)
-        {
-            if (e.KeyCode == Keys.Enter && !string.IsNullOrWhiteSpace(_folderTextBox.Text))
-            {
+        private void _folderTextBox_KeyDown(object sender, System.Windows.Forms.KeyEventArgs e) {
+            if (e.KeyCode == Keys.Enter && !string.IsNullOrWhiteSpace(_folderTextBox.Text)) {
                 RefreshFolderButton_Click(sender, e);
                 e.Handled = true;
                 e.SuppressKeyPress = true;
             }
         }
 
-        private void _filterComboBox_KeyDown(object sender, System.Windows.Forms.KeyEventArgs e)
-        {
-            if (e.KeyCode == Keys.Enter && !string.IsNullOrWhiteSpace(_folderTextBox.Text))
-            {
+        private void _filterComboBox_KeyDown(object sender, System.Windows.Forms.KeyEventArgs e) {
+            if (e.KeyCode == Keys.Enter && !string.IsNullOrWhiteSpace(_folderTextBox.Text)) {
                 if (_filterComboBox.FindStringExact(_filterComboBox.Text.ToLower()) == -1)
                     _filterComboBox.Items.Add(_filterComboBox.Text.ToLower());
                 RefreshGridView();
             }
         }
 
-        private void MiniserverForm_Load(object sender, EventArgs e)
-        {
+        private void MiniserverForm_Load(object sender, EventArgs e) {
 
             // if not remote desktop session then enable double-buffering optimization
-            if (!System.Windows.Forms.SystemInformation.TerminalServerSession)
-            {
-                typeof(DataGridView).InvokeMember("DoubleBuffered", System.Reflection.BindingFlags.NonPublic | 
+            if (!System.Windows.Forms.SystemInformation.TerminalServerSession) {
+                typeof(DataGridView).InvokeMember("DoubleBuffered", System.Reflection.BindingFlags.NonPublic |
                     System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.SetProperty, null, _dataGridView, new object[] { true });
             }
 
@@ -830,12 +739,11 @@ namespace LoxStatEdit
                 Settings.Default.Reload();
                 Settings.Default.IsSettingsUpgradeRequired = false;
                 Settings.Default.Save();
-            } 
+            }
 
             if (Properties.Settings.Default.IsMaximizedMainWindow)
                 WindowState = FormWindowState.Maximized;
-            else if (Screen.AllScreens.Any(screen => screen.WorkingArea.IntersectsWith(Properties.Settings.Default.MainWindowPosition)))
-            {
+            else if (Screen.AllScreens.Any(screen => screen.WorkingArea.IntersectsWith(Properties.Settings.Default.MainWindowPosition))) {
                 StartPosition = FormStartPosition.Manual;
                 DesktopBounds = Properties.Settings.Default.MainWindowPosition;
                 WindowState = FormWindowState.Normal;
@@ -843,66 +751,55 @@ namespace LoxStatEdit
 
             _folderTextBox.Text = Path.Combine(Environment.GetFolderPath(
                 Environment.SpecialFolder.MyDocuments), "LoxStatEdit");
-            if(_args.Length >= 1)
-            {
+            if (_args.Length >= 1) {
                 _urlTextBox.Text = _args[0];
                 RefreshMs();
             }
-            if(_args.Length >= 2)
+            if (_args.Length >= 2)
                 _folderTextBox.Text = Path.GetFullPath(_args[1]);
             RefreshLocal();
             RefreshGridView();
         }
 
-        private void MiniserverForm_Closing(object sender, FormClosingEventArgs e)
-        {
-            this.SaveWindowPosition(sender, e);
-        }
-        
-        private void MiniserverForm_ResizeEnd(object sender, EventArgs e)
-        {
+        private void MiniserverForm_Closing(object sender, FormClosingEventArgs e) {
             this.SaveWindowPosition(sender, e);
         }
 
-        private void SaveWindowPosition(object sender, EventArgs e)
-        {
+        private void MiniserverForm_ResizeEnd(object sender, EventArgs e) {
+            this.SaveWindowPosition(sender, e);
+        }
+
+        private void SaveWindowPosition(object sender, EventArgs e) {
             Properties.Settings.Default.IsMaximizedMainWindow = WindowState == FormWindowState.Maximized;
             Properties.Settings.Default.MainWindowPosition = DesktopBounds;
             Properties.Settings.Default.Save();
         }
 
-        private void DataGridView_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
-        {
-            if ((e.RowIndex < 0) || (e.RowIndex >= _fileItems.Count))
-            {
+        private void DataGridView_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e) {
+            if ((e.RowIndex < 0) || (e.RowIndex >= _fileItems.Count)) {
                 e.Value = null;
                 return;
             }
             if (e.ColumnIndex == 0) // The FileName column is at index 0
             {
                 var fileItem = _fileItems[e.RowIndex];
-                if (!fileItem.IsValidMsStatsFile)
-                {
+                if (!fileItem.IsValidMsStatsFile) {
                     e.CellStyle.BackColor = System.Drawing.Color.Red;
                 }
             }
             if (e.ColumnIndex == 1) // The Description / Name column is at index 1
             {
                 var fileItem = _fileItems[e.RowIndex];
-                if (fileItem.Name == "Download to view description")
-                {
+                if (fileItem.Name == "Download to view description") {
                     e.CellStyle.Font = new System.Drawing.Font(e.CellStyle.Font, System.Drawing.FontStyle.Italic);
-                }
-                else
-                {
+                } else {
                     e.CellStyle.Font = new System.Drawing.Font(e.CellStyle.Font, System.Drawing.FontStyle.Regular);
                 }
             }
             if (e.ColumnIndex == 5) // The Status column is at index 5
             {
                 var fileItem = _fileItems[e.RowIndex];
-                switch (fileItem.Status)
-                {
+                switch (fileItem.Status) {
                     case FileItem.IDStatusOnlyOnMS:
                         e.CellStyle.BackColor = System.Drawing.Color.LightGray;
                         break;
@@ -929,59 +826,73 @@ namespace LoxStatEdit
             }
 
         }
-        
-        private void DataGridView_CellValueNeeded(object sender, DataGridViewCellValueEventArgs e)
-        {
-            try
-            {
-                if ((e.RowIndex < 0) || (e.RowIndex >= _fileItems.Count))
-                {
+
+        private void DataGridView_CellValueNeeded(object sender, DataGridViewCellValueEventArgs e) {
+            try {
+                if ((e.RowIndex < 0) || (e.RowIndex >= _fileItems.Count)) {
                     e.Value = null;
                     return;
                 }
                 var fileItem = _fileItems[e.RowIndex];
-                switch(e.ColumnIndex)
-                {
-                    case 0: e.Value = fileItem.FileName; break;
-                    case 1: e.Value = fileItem.Name; break;
-                    case 2: e.Value = fileItem.YearMonth; break;
-                    case 3: e.Value = fileItem.DateModified; break;
-                    case 4: e.Value = fileItem.Size; break;
-                    case 5: e.Value = fileItem.StatusString; break;
-                    case 6: e.Value = "Download"; break;
-                    case 7: e.Value = "Edit"; break;
-                    case 8: e.Value = "Upload"; break;
-                    case 9: e.Value = "Convert"; break;
-                    case 10: e.Value = "Delete"; break;
-                    default: e.Value = null; break;
+                switch (e.ColumnIndex) {
+                    case 0:
+                        e.Value = fileItem.FileName;
+                        break;
+                    case 1:
+                        e.Value = fileItem.Name;
+                        break;
+                    case 2:
+                        e.Value = fileItem.YearMonth;
+                        break;
+                    case 3:
+                        e.Value = fileItem.DateModified;
+                        break;
+                    case 4:
+                        e.Value = fileItem.Size;
+                        break;
+                    case 5:
+                        e.Value = fileItem.StatusString;
+                        break;
+                    case 6:
+                        e.Value = "Download";
+                        break;
+                    case 7:
+                        e.Value = "Edit";
+                        break;
+                    case 8:
+                        e.Value = "Upload";
+                        break;
+                    case 9:
+                        e.Value = "Convert";
+                        break;
+                    case 10:
+                        e.Value = "Delete";
+                        break;
+                    default:
+                        e.Value = null;
+                        break;
                 }
             }
-            catch
-            {
-            #if DEBUG
+            catch {
+#if DEBUG
                 Debugger.Break();
-            #endif
+#endif
                 e.Value = null;
             }
         }
 
-        private void DataGridView_CellToolTipTextNeeded(object sender, DataGridViewCellToolTipTextNeededEventArgs e)
-        {
-            try
-            {
-                if ((e.RowIndex < 0) || (e.RowIndex >= _fileItems.Count))
-                {
+        private void DataGridView_CellToolTipTextNeeded(object sender, DataGridViewCellToolTipTextNeededEventArgs e) {
+            try {
+                if ((e.RowIndex < 0) || (e.RowIndex >= _fileItems.Count)) {
                     //e.ToolTipText = null;
                     return;
                 }
-               
+
                 var fileItem = _fileItems[e.RowIndex];
-                switch (e.ColumnIndex)
-                {
+                switch (e.ColumnIndex) {
                     case 0: // fileItem.FileName; 
-                        if (!fileItem.IsValidMsStatsFile)
-                        {
-                            e.ToolTipText = "The UUID and/or file extension looks to be malformed.\n\n"+
+                        if (!fileItem.IsValidMsStatsFile) {
+                            e.ToolTipText = "The UUID and/or file extension looks to be malformed.\n\n" +
                                 "Please check, if it is used by the MS. If not, you may consider to remove the file.";
                         }
                         break;
@@ -999,8 +910,7 @@ namespace LoxStatEdit
                         break;
                 }
             }
-            catch
-            {
+            catch {
 #if DEBUG
                 Debugger.Break();
 #endif
@@ -1008,28 +918,29 @@ namespace LoxStatEdit
             }
         }
 
-        private void DataGridView_CellContentClick(object sender, DataGridViewCellEventArgs e)
-        {
+        private void DataGridView_CellContentClick(object sender, DataGridViewCellEventArgs e) {
             DialogResult result;
 
-            if (e.RowIndex < 0) return; //When clicking the header row
+            // clean up progress bar
+            progressBar.Value = 0;
+            progressBar.SetState(1);
+            progressLabel.Text = "Idle";
+
+            if (e.RowIndex < 0)
+                return; //When clicking the header row
             var fileItem = _fileItems[e.RowIndex];
-            switch (e.ColumnIndex)
-            {
+            switch (e.ColumnIndex) {
                 case 6: //Download
                     progressBar.Maximum = 1;
                     progressBar.Value = 0;
                     progressBar.SetState(1);
                     progressLabel.Text = "Starting download...";
-                    if(Download(fileItem))
-                    {
+                    if (Download(fileItem)) {
                         progressBar.Value = 1;
                         progressLabel.Text = "Download complete!";
                         RefreshLocal();
                         RefreshGridView();
-                    }
-                    else
-                    {
+                    } else {
                         progressBar.Value = 1;
                         progressBar.SetState(2);
                         progressLabel.Text = "Download failed!";
@@ -1037,22 +948,20 @@ namespace LoxStatEdit
                     break;
                 case 7: //Edit
                     // show error message, if file is not downloaded yet
-                    if (fileItem.FileInfo == null)
-                    {
-                        MessageBox.Show($"The file \"{fileItem.FileName}\" cannot be edited, since it's not available on the filesystem.\n\n"+
+                    if (fileItem.FileInfo == null) {
+                        MessageBox.Show($"The file \"{fileItem.FileName}\" cannot be edited, since it's not available on the filesystem.\n\n" +
                             "Please download it first.", "Error - File not downloaded", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         break;
                     }
 
                     //Console.WriteLine(fileItem.FileInfo.FullName);
-                    using (var form = new LoxStatFileForm(fileItem.FileInfo.FullName))
-                    {
+                    using (var form = new LoxStatFileForm(fileItem.FileInfo.FullName)) {
                         // Calculate the new location
                         System.Drawing.Rectangle fileWindowRect = Properties.Settings.Default.FileWindowPosition;
                         if (fileWindowRect.Top == 0) {
                             form.StartPosition = FormStartPosition.Manual; // Allows manual positioning
                             form.Location = new System.Drawing.Point(this.Location.X + 40, this.Location.Y + 70);
-                        } 
+                        }
 
                         // Show the form as a dialog
                         form.ShowDialog(this);
@@ -1062,9 +971,8 @@ namespace LoxStatEdit
                     break;
                 case 8: //Upload
                     // show error message, if there is no file to upload
-                    if (fileItem.FileInfo == null)
-                    {
-                        MessageBox.Show($"The file \"{fileItem.FileName}\" cannot be uploaded, since it's not available on the local filesystem.\n\n"+
+                    if (fileItem.FileInfo == null) {
+                        MessageBox.Show($"The file \"{fileItem.FileName}\" cannot be uploaded, since it's not available on the local filesystem.\n\n" +
                             "Please download it first.", "Error - File not downloaded", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         break;
                     }
@@ -1073,15 +981,12 @@ namespace LoxStatEdit
                     progressBar.Value = 0;
                     progressBar.SetState(1);
                     progressLabel.Text = "Starting upload...";
-                    if (Upload(fileItem))
-                    {
+                    if (Upload(fileItem)) {
                         progressBar.Value = 1;
                         progressLabel.Text = "Upload complete!";
                         RefreshMs();
                         RefreshGridView();
-                    }
-                    else
-                    {
+                    } else {
                         progressBar.Value = 1;
                         progressBar.SetState(2);
                         progressLabel.Text = "Upload failed!";
@@ -1089,17 +994,20 @@ namespace LoxStatEdit
                     break;
                 case 9: //Convert
 
+                    progressBar.Maximum = 1;
+                    progressBar.Value = 0;
+                    progressBar.SetState(1);
+                    progressLabel.Text = "Starting converting...";
+
                     // show error message, if file is not downloaded yet
-                    if (fileItem.FileInfo == null)
-                    {
+                    if (fileItem.FileInfo == null) {
                         MessageBox.Show($"The file \"{fileItem.FileName}\" cannot be converted, since it's not available on the local filesystem.\n\n" +
                             "Please download it first.", "Error - File not downloaded", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         break;
                     }
                     //Console.WriteLine(fileItem.FileInfo.FullName);
                     // Show dialog for conversion settings
-                    using (var form = new LoxStatConvertForm(GetFilteredLocalFileItems(), fileItem))
-                    {
+                    using (var form = new LoxStatConvertForm(GetFilteredLocalFileItems(), fileItem)) {
                         // Calculate the new location
                         int offsetX = 100; // Horizontal offset from the parent form
                         int offsetY = 50; // Vertical offset from the parent form
@@ -1111,50 +1019,36 @@ namespace LoxStatEdit
                     }
                     RefreshLocal();
                     RefreshGridView();
-                    // ToDo: progress bar for multiple files
-                    if (false)
-                    {
-                        progressBar.Maximum = 1;
-                        progressBar.Value = 0;
-                        progressBar.SetState(1);
-                        progressLabel.Text = "Starting converting...";
-                        if (Convert(fileItem))
-                        {
-                            progressBar.Value = 1;
-                            progressLabel.Text = "Converting complete!";
-                            RefreshMs();
-                            RefreshLocal();
-                            RefreshGridView();
-                        }
-                        else
-                        {
-                            progressBar.Value = 1;
-                            progressBar.SetState(2);
-                            progressLabel.Text = "Converting failed!";
-                        }
+
+                    // ToDo: move code for conversion to convert function
+                    if (Convert(fileItem)) {
+                        progressBar.Value = 1;
+                        progressLabel.Text = "Converting complete!";
+                        RefreshMs();
+                        RefreshLocal();
+                        RefreshGridView();
+                    } else {
+                        progressBar.Value = 1;
+                        progressBar.SetState(2);
+                        progressLabel.Text = "Converting failed!";
                     }
                     break;
                 case 10: //Delete
                     // show error message, if there is no file to upload
-                    if ((fileItem.FileInfo != null) || (fileItem.MsFileInfo != null))
-                    {
-                        result = MessageBox.Show($"Do you want to delete the file \"{fileItem.FileName}\" from the Loxone MS and local file system?", "Question - Delete Stats File from", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-                        if (result == DialogResult.Yes)
-                        {
+                    if ((fileItem.FileInfo != null) || (fileItem.MsFileInfo != null)) {
+                        result = MessageBox.Show($"Do you really want to delete the file:\n{fileItem.FileName}\n\nfrom the Loxone MS and local file system?", "Question - Delete Stats File from MS and FS?", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                        if (result == DialogResult.Yes) {
                             progressBar.Maximum = 1;
                             progressBar.Value = 0;
                             progressBar.SetState(1);
                             progressLabel.Text = "Starting delete...";
-                            if (Delete(fileItem))
-                            {
+                            if (Delete(fileItem)) {
                                 progressBar.Value = 1;
                                 progressLabel.Text = "Deleting complete!";
                                 RefreshMs();
                                 RefreshLocal();
                                 RefreshGridView();
-                            }
-                            else
-                            {
+                            } else {
                                 progressBar.Value = 1;
                                 progressBar.SetState(2);
                                 progressLabel.Text = "Deleting failed!";
@@ -1165,19 +1059,16 @@ namespace LoxStatEdit
             }
         }
 
-        private async void DownloadButton_Click(object sender, EventArgs e)
-        {
+        private async void DownloadButton_Click(object sender, EventArgs e) {
             progressBar.Maximum = _dataGridView.SelectedRows.Count;
             progressBar.Value = 0;
             progressBar.SetState(1);
             progressLabel.Text = "Starting download...";
 
-            foreach(DataGridViewRow row in _dataGridView.SelectedRows)
-            {
+            foreach (DataGridViewRow row in _dataGridView.SelectedRows) {
                 int rowIndex = row.Index; // Capture the index for the closure
                 bool result = await Task.Run(() => Download(_fileItems[rowIndex]));
-                if (!result)
-                {
+                if (!result) {
                     progressBar.Value = progressBar.Maximum;
                     progressBar.SetState(2);
                     progressLabel.Text = "Download failed!";
@@ -1194,20 +1085,17 @@ namespace LoxStatEdit
             RefreshGridView();
         }
 
-        private async void UploadButton_Click(object sender, EventArgs e)
-        {
+        private async void UploadButton_Click(object sender, EventArgs e) {
             progressBar.Maximum = _dataGridView.SelectedRows.Count;
             progressBar.Value = 0;
             progressBar.SetState(1);
             progressLabel.Text = "Starting upload...";
 
-            foreach(DataGridViewRow row in _dataGridView.SelectedRows)
-            {
+            foreach (DataGridViewRow row in _dataGridView.SelectedRows) {
                 int rowIndex = row.Index; // Capture the index for the closure
 
                 // show error message, if there is no file to upload
-                if (_fileItems[rowIndex].FileInfo == null)
-                {
+                if (_fileItems[rowIndex].FileInfo == null) {
                     progressBar.Value = progressBar.Maximum;
                     progressLabel.Text = "Upload failed!";
                     MessageBox.Show($"The file \"{_fileItems[rowIndex].FileName}\" cannot be uploaded, since it's not available on the filesystem.\n\nPlease download it first.", "Error - File not downloaded", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -1215,8 +1103,7 @@ namespace LoxStatEdit
                 }
 
                 bool result = await Task.Run(() => Upload(_fileItems[rowIndex]));
-                if (!result)
-                {
+                if (!result) {
                     progressBar.Value = progressBar.Maximum;
                     progressBar.SetState(2);
                     progressLabel.Text = "Download failed!";
@@ -1230,22 +1117,66 @@ namespace LoxStatEdit
         }
 
         // Launch project link
-        private void githubLinkLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-        {
+        private void githubLinkLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e) {
             System.Diagnostics.Process.Start("https://github.com/mr-manuel/Loxone_LoxStatEdit");
         }
 
-        private void donateLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-        {
+        private void donateLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e) {
             System.Diagnostics.Process.Start("https://github.md0.eu/links/loxstatsedit-donate");
         }
 
         #endregion
 
-        private void aboutLabel_Click(object sender, EventArgs e)
-        {
+        private void aboutLabel_Click(object sender, EventArgs e) {
 
         }
 
+        private void ConvertButton_Click(object sender, EventArgs e) {
+
+        }
+
+        private void DeleteButton_Click(object sender, EventArgs e) {
+
+            // build a list of file names and file items for selected rows
+            IList<FileItem> selectedFileItems = new List<FileItem>();
+            IList<string> selectedFileNames = new List<string>();
+
+            foreach (DataGridViewRow row in _dataGridView.SelectedRows) {
+                int rowIndex = row.Index; // Capture the index for the closure
+                selectedFileItems.Add(_fileItems[rowIndex]);
+                selectedFileNames.Add(_fileItems[rowIndex].FileName);
+            }
+            // return fileItems.OrderBy(f => f.FileInfo?.Name).ToList();
+
+            // Delete all selected files after dialog to confirm
+            if ((selectedFileItems.Count > 0)) {
+                DialogResult result = MessageBox.Show($"Do you really want to delete the following file(s):\n {string.Join("\n ", selectedFileNames)}\n\nfrom the Loxone MS AND local file system?\n\n" +
+                                          "IMPORTANT: There is NO undo function for this action!"
+                    , "Question - Delete Stats File(s) from MS and FS?", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                if (result == DialogResult.Yes) {
+                    int failedCounter = 0;
+                    progressBar.Maximum = selectedFileItems.Count;
+                    progressBar.Value = 0;
+                    progressBar.SetState(1);
+                    progressLabel.Text = "Starting delete...";
+                    foreach (FileItem fileItem in selectedFileItems) {
+                        progressBar.Value += 1;
+                        progressLabel.Text = $"Deleting {fileItem.FileName} ...";
+                        if (!Delete(fileItem))
+                            failedCounter += 1;
+                    }
+                    if (failedCounter > 0) {
+                        progressBar.SetState(2);
+                        progressLabel.Text = $"Deleting complete. {failedCounter} has/have failed!";
+                    } else {
+                        progressLabel.Text = "Deleting complete!";
+                    }
+
+                    RefreshMs();
+                    RefreshLocal();
+                    RefreshGridView();
+                }
+            }
+        } // end of DeleteButton_Click
     }
 }

@@ -163,6 +163,8 @@
     <value>This function converts statistics data from a meter with old statistics style (e.g. a utility meter function block) to an
 universal meter function block (with 'Pf' and 'Mr' inputs). 
 
+NOTE: This function is only implemented for simple (unidirectional) and bidirectional meters.
+
 1. At first you have to create the new meter function blocks in Loxone Config to get internal UUIDs that are used a file names.
 2. Then you convert the statistics data for previous months / years from the old to the new one by selecting its UUID. 
 
@@ -177,7 +179,7 @@ You may also choose not to create any power/flow data for the new statistics fil
 
 This is how the function works:
 - Values are transferred from this file (old style, without '_#' in file name) to a function block with new style (with '_#' in file name).
-- It is assumed that 'value' contains the meter readings and 'value 2' (optional) the power / flow data.
+- It is assumed that 'value' contains the meter readings and 'value 2' (optional) the power / flow data in the old statistics file.
 - Data from column 'value' (meter reading) from this file is transferred to new UUID to _2 file into 'value' (consumption) or 'value 2' (feed). 
 - The column can be selected. If the new meter has two columns for data, two columns will be created, otherwise only one.
 - Data from column 'value 2' (power / flow data, if existing) from this file is transferred to new UUID to _1 file into 'value'.

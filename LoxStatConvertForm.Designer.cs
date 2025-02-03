@@ -108,7 +108,6 @@
             fileNameLabel.TabIndex = 0;
             fileNameLabel.Text = "File Name:";
             fileNameLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            fileNameLabel.Click += new System.EventHandler(this.fileNameLabel_Click);
             // 
             // OkButton
             // 
@@ -130,7 +129,6 @@
             changeIntervalLabel.TabIndex = 15;
             changeIntervalLabel.Text = "Change recording interval for meter reading to:";
             changeIntervalLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            changeIntervalLabel.Click += new System.EventHandler(this.changeIntervalLabel_Click);
             // 
             // changeIntervalPowerlabel
             // 
@@ -140,7 +138,6 @@
             changeIntervalPowerlabel.TabIndex = 10;
             changeIntervalPowerlabel.Text = "Change recording interval for power/flow to:";
             changeIntervalPowerlabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            changeIntervalPowerlabel.Click += new System.EventHandler(this.changeIntervalPowerlabel_Click);
             // 
             // selectUUIDlabel
             // 
@@ -151,7 +148,6 @@
             selectUUIDlabel.Text = "Select the new meter function block by UUID / file info (must exist  on local FS)" +
     ":";
             selectUUIDlabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            selectUUIDlabel.Click += new System.EventHandler(this.selectUUIDlabel_Click);
             // 
             // writeValuelabel
             // 
@@ -161,7 +157,6 @@
             writeValuelabel.TabIndex = 12;
             writeValuelabel.Text = "Write values for meter reading to:";
             writeValuelabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            writeValuelabel.Click += new System.EventHandler(this.writeValuelabel_Click);
             // 
             // changeIntervalTolabel
             // 
@@ -189,7 +184,6 @@
             infoLabel.TabIndex = 8;
             infoLabel.Text = "Info";
             infoLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            infoLabel.Click += new System.EventHandler(this.label1_Click);
             // 
             // descriptionTextBox
             // 
