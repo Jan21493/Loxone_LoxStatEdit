@@ -26,24 +26,24 @@ namespace LoxStatEdit.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0, 0, -1, -1")]
-        public global::System.Drawing.Rectangle WindowPosition {
+        public global::System.Drawing.Rectangle MainWindowPosition {
             get {
-                return ((global::System.Drawing.Rectangle)(this["WindowPosition"]));
+                return ((global::System.Drawing.Rectangle)(this["MainWindowPosition"]));
             }
             set {
-                this["WindowPosition"] = value;
+                this["MainWindowPosition"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool IsMaximized {
+        public bool IsMaximizedMainWindow {
             get {
-                return ((bool)(this["IsMaximized"]));
+                return ((bool)(this["IsMaximizedMainWindow"]));
             }
             set {
-                this["IsMaximized"] = value;
+                this["IsMaximizedMainWindow"] = value;
             }
         }
         
@@ -56,6 +56,42 @@ namespace LoxStatEdit.Properties {
             }
             set {
                 this["IsSettingsUpgradeRequired"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0, 0, -1, -1")]
+        public global::System.Drawing.Rectangle FileWindowPosition {
+            get {
+                return ((global::System.Drawing.Rectangle)(this["FileWindowPosition"]));
+            }
+            set {
+                this["FileWindowPosition"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool IsMaximizedFileWindow {
+            get {
+                return ((bool)(this["IsMaximizedFileWindow"]));
+            }
+            set {
+                this["IsMaximizedFileWindow"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("-1")]
+        public int FileWindowSplitterDistance {
+            get {
+                return ((int)(this["FileWindowSplitterDistance"]));
+            }
+            set {
+                this["FileWindowSplitterDistance"] = value;
             }
         }
     }

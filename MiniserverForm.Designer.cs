@@ -485,7 +485,7 @@ namespace LoxStatEdit
             this.Text = "Loxone Stats Editor - Miniserver Browser";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MiniserverForm_Closing);
             this.Load += new System.EventHandler(this.MiniserverForm_Load);
-            this.ResizeEnd += new System.EventHandler(this.MiniserverForm_ResizEnd);
+            this.ResizeEnd += new System.EventHandler(this.MiniserverForm_ResizeEnd);
             ((System.ComponentModel.ISupportInitialize)(this._dataGridView)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();

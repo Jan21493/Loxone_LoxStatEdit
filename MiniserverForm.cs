@@ -832,12 +832,12 @@ namespace LoxStatEdit
                 Settings.Default.Save();
             } 
 
-            if (Properties.Settings.Default.IsMaximized)
+            if (Properties.Settings.Default.IsMaximizedMainWindow)
                 WindowState = FormWindowState.Maximized;
-            else if (Screen.AllScreens.Any(screen => screen.WorkingArea.IntersectsWith(Properties.Settings.Default.WindowPosition)))
+            else if (Screen.AllScreens.Any(screen => screen.WorkingArea.IntersectsWith(Properties.Settings.Default.MainWindowPosition)))
             {
                 StartPosition = FormStartPosition.Manual;
-                DesktopBounds = Properties.Settings.Default.WindowPosition;
+                DesktopBounds = Properties.Settings.Default.MainWindowPosition;
                 WindowState = FormWindowState.Normal;
             }
 
@@ -859,15 +859,15 @@ namespace LoxStatEdit
             this.SaveWindowPosition(sender, e);
         }
         
-        private void MiniserverForm_ResizEnd(object sender, EventArgs e)
+        private void MiniserverForm_ResizeEnd(object sender, EventArgs e)
         {
             this.SaveWindowPosition(sender, e);
         }
 
         private void SaveWindowPosition(object sender, EventArgs e)
         {
-            Properties.Settings.Default.IsMaximized = WindowState == FormWindowState.Maximized;
-            Properties.Settings.Default.WindowPosition = DesktopBounds;
+            Properties.Settings.Default.IsMaximizedMainWindow = WindowState == FormWindowState.Maximized;
+            Properties.Settings.Default.MainWindowPosition = DesktopBounds;
             Properties.Settings.Default.Save();
         }
 
@@ -1048,10 +1048,11 @@ namespace LoxStatEdit
                     using (var form = new LoxStatFileForm(fileItem.FileInfo.FullName))
                     {
                         // Calculate the new location
-                        int offsetX = 42; // Horizontal offset from the parent form
-                        int offsetY = 70; // Vertical offset from the parent form
-                        form.StartPosition = FormStartPosition.Manual; // Allows manual positioning
-                        form.Location = new System.Drawing.Point(this.Location.X + offsetX, this.Location.Y + offsetY);
+                        System.Drawing.Rectangle fileWindowRect = Properties.Settings.Default.FileWindowPosition;
+                        if (fileWindowRect.Top == 0) {
+                            form.StartPosition = FormStartPosition.Manual; // Allows manual positioning
+                            form.Location = new System.Drawing.Point(this.Location.X + 40, this.Location.Y + 70);
+                        } 
 
                         // Show the form as a dialog
                         form.ShowDialog(this);

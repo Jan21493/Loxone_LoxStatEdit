@@ -57,6 +57,22 @@ namespace LoxStatEdit
             }
         }
 
+        public ushort msStatsType {
+            get {
+                // get the type from the file name after UUID and _ 
+                // if there is no _ in the filename after an UUID (35 characters), old type (=0 is assumed)
+                // e.g. 1cc8df9f-0229-8b1d-ffffefc088fafadd_1.202404
+                string fileName = Path.GetFileNameWithoutExtension(FileName);
+                ushort typeNo = 0;
+                if ((fileName.IndexOf('_') > -1) && (fileName.IndexOf('_') < fileName.Length - 1))
+                    typeNo = (ushort)(fileName[fileName.IndexOf('_') + 1] - '0');
+                if (typeNo > 0 && typeNo < 10)
+                    return typeNo;
+                else
+                    return 0;
+            }
+        }
+
         public DateTime YearMonth
         {
             get {
@@ -108,8 +124,9 @@ namespace LoxStatEdit
                 if (TextLength == 0)
                     AddProblem(collection, "Unexpected text length");
                 //Intentionally not checking Padding
-                foreach (var dataPoint in DataPoints)
-                    dataPoint.AddProblems(collection);
+                if (DataPoints != null)
+                    foreach (var dataPoint in DataPoints)
+                        dataPoint.AddProblems(collection);
             }
             catch (Exception ex)
             {
@@ -152,7 +169,7 @@ namespace LoxStatEdit
                     loxStatFile.TextBytes = reader.ReadBytes(loxStatFile.TextLength);
                     loxStatFile.TextTerminator = reader.ReadByte();
                     loxStatFile.Padding = reader.ReadBytes(
-                        loxStatFile.GetPaddingLength(13 + loxStatFile.TextLength));
+                    loxStatFile.GetPaddingLength(13 + loxStatFile.TextLength));
 
                     List<LoxStatDataPoint> dataPoints = new List<LoxStatDataPoint>();
                     loxStatFile.DataPoints = dataPoints;

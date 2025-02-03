@@ -30,8 +30,6 @@
         {
             this.components = new System.ComponentModel.Container();
             System.Windows.Forms.Label fileInfoLabel;
-            System.Windows.Forms.Button saveButton;
-            System.Windows.Forms.Button loadButton;
             System.Windows.Forms.Button browseButton;
             System.Windows.Forms.Label fileNameLabel;
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
@@ -41,6 +39,8 @@
             System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
             System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(LoxStatFileForm));
+            this._saveButton = new System.Windows.Forms.Button();
+            this._loadButton = new System.Windows.Forms.Button();
             this._problemButton = new System.Windows.Forms.Button();
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
             this._fileInfoTextBox = new System.Windows.Forms.TextBox();
@@ -52,9 +52,9 @@
             this._chart = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.toolTip = new System.Windows.Forms.ToolTip(this.components);
             this.splitContainer = new System.Windows.Forms.SplitContainer();
+            this._prevButton = new System.Windows.Forms.Button();
+            this._nextButton = new System.Windows.Forms.Button();
             fileInfoLabel = new System.Windows.Forms.Label();
-            saveButton = new System.Windows.Forms.Button();
-            loadButton = new System.Windows.Forms.Button();
             browseButton = new System.Windows.Forms.Button();
             fileNameLabel = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this._dataGridView)).BeginInit();
@@ -73,34 +73,34 @@
             fileInfoLabel.TabIndex = 4;
             fileInfoLabel.Text = "File Info:";
             // 
-            // saveButton
+            // _saveButton
             // 
-            saveButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            saveButton.Location = new System.Drawing.Point(797, 38);
-            saveButton.Name = "saveButton";
-            saveButton.Size = new System.Drawing.Size(75, 23);
-            saveButton.TabIndex = 7;
-            saveButton.Text = "&Save";
-            this.toolTip.SetToolTip(saveButton, "Save current statistic file (ALT + S)");
-            saveButton.UseVisualStyleBackColor = true;
-            saveButton.Click += new System.EventHandler(this.SaveButton_Click);
+            this._saveButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this._saveButton.Location = new System.Drawing.Point(796, 38);
+            this._saveButton.Name = "_saveButton";
+            this._saveButton.Size = new System.Drawing.Size(75, 23);
+            this._saveButton.TabIndex = 7;
+            this._saveButton.Text = "&Save";
+            this.toolTip.SetToolTip(this._saveButton, "Save current statistic file (ALT + S)");
+            this._saveButton.UseVisualStyleBackColor = true;
+            this._saveButton.Click += new System.EventHandler(this.SaveButton_Click);
             // 
-            // loadButton
+            // _loadButton
             // 
-            loadButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            loadButton.Location = new System.Drawing.Point(797, 11);
-            loadButton.Name = "loadButton";
-            loadButton.Size = new System.Drawing.Size(75, 23);
-            loadButton.TabIndex = 3;
-            loadButton.Text = "&Load";
-            this.toolTip.SetToolTip(loadButton, "Load selected statistic file (ALT + L)");
-            loadButton.UseVisualStyleBackColor = true;
-            loadButton.Click += new System.EventHandler(this.LoadButton_Click);
+            this._loadButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this._loadButton.Location = new System.Drawing.Point(796, 11);
+            this._loadButton.Name = "_loadButton";
+            this._loadButton.Size = new System.Drawing.Size(75, 23);
+            this._loadButton.TabIndex = 3;
+            this._loadButton.Text = "&Load";
+            this.toolTip.SetToolTip(this._loadButton, "Load selected statistic file (ALT + L)");
+            this._loadButton.UseVisualStyleBackColor = true;
+            this._loadButton.Click += new System.EventHandler(this.LoadButton_Click);
             // 
             // browseButton
             // 
             browseButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            browseButton.Location = new System.Drawing.Point(716, 12);
+            browseButton.Location = new System.Drawing.Point(716, 11);
             browseButton.Name = "browseButton";
             browseButton.Size = new System.Drawing.Size(75, 23);
             browseButton.TabIndex = 2;
@@ -138,7 +138,7 @@
             this._fileInfoTextBox.Location = new System.Drawing.Point(78, 40);
             this._fileInfoTextBox.Name = "_fileInfoTextBox";
             this._fileInfoTextBox.ReadOnly = true;
-            this._fileInfoTextBox.Size = new System.Drawing.Size(632, 20);
+            this._fileInfoTextBox.Size = new System.Drawing.Size(552, 20);
             this._fileInfoTextBox.TabIndex = 5;
             this._fileInfoTextBox.Text = "Enter a file name and press the load button or browse a file";
             // 
@@ -204,7 +204,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this._fileNameTextBox.Location = new System.Drawing.Point(78, 14);
             this._fileNameTextBox.Name = "_fileNameTextBox";
-            this._fileNameTextBox.Size = new System.Drawing.Size(632, 20);
+            this._fileNameTextBox.Size = new System.Drawing.Size(552, 20);
             this._fileNameTextBox.TabIndex = 1;
             // 
             // _chart
@@ -247,7 +247,7 @@
             series1.Legend = "Legend1";
             series1.Name = "Series1";
             this._chart.Series.Add(series1);
-            this._chart.Size = new System.Drawing.Size(568, 483);
+            this._chart.Size = new System.Drawing.Size(564, 483);
             this._chart.TabIndex = 9;
             this._chart.Text = "chart1";
             // 
@@ -272,26 +272,55 @@
             this.splitContainer.SplitterWidth = 6;
             this.splitContainer.TabIndex = 10;
             // 
+            // _prevButton
+            // 
+            this._prevButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this._prevButton.Location = new System.Drawing.Point(636, 11);
+            this._prevButton.Name = "_prevButton";
+            this._prevButton.Size = new System.Drawing.Size(75, 23);
+            this._prevButton.TabIndex = 11;
+            this._prevButton.Text = "&Previous";
+            this.toolTip.SetToolTip(this._prevButton, "Load local statistic file for previous month (ALT + P)");
+            this._prevButton.UseVisualStyleBackColor = true;
+            this._prevButton.Click += new System.EventHandler(this.PreviousButton_Click);
+            // 
+            // _nextButton
+            // 
+            this._nextButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this._nextButton.Location = new System.Drawing.Point(636, 38);
+            this._nextButton.Name = "_nextButton";
+            this._nextButton.Size = new System.Drawing.Size(75, 23);
+            this._nextButton.TabIndex = 12;
+            this._nextButton.Text = "&Next";
+            this.toolTip.SetToolTip(this._nextButton, "Load statistic file for next month (ALT + N)");
+            this._nextButton.UseVisualStyleBackColor = true;
+            this._nextButton.Click += new System.EventHandler(this.NextButton_Click);
+            // 
             // LoxStatFileForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(884, 561);
+            this.Controls.Add(this._nextButton);
+            this.Controls.Add(this._prevButton);
             this.Controls.Add(this.splitContainer);
             this.Controls.Add(this._problemButton);
-            this.Controls.Add(saveButton);
+            this.Controls.Add(this._saveButton);
             this.Controls.Add(this._fileInfoTextBox);
             this.Controls.Add(fileInfoLabel);
             this.Controls.Add(fileNameLabel);
-            this.Controls.Add(loadButton);
+            this.Controls.Add(this._loadButton);
             this.Controls.Add(this._fileNameTextBox);
             this.Controls.Add(browseButton);
             this.DoubleBuffered = true;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MinimumSize = new System.Drawing.Size(575, 276);
             this.Name = "LoxStatFileForm";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
             this.Text = "Loxone Stats Editor - File Editor";
-            this.Load += new System.EventHandler(this.MainForm_Load);
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.FileForm_Closing);
+            this.Load += new System.EventHandler(this.FileForm_Load);
+            this.ResizeEnd += new System.EventHandler(this.FileForm_ResizeEnd);
             ((System.ComponentModel.ISupportInitialize)(this._dataGridView)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this._chart)).EndInit();
             this.splitContainer.Panel1.ResumeLayout(false);
@@ -316,6 +345,10 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn indexColumn;
         private System.Windows.Forms.DataGridViewTextBoxColumn timestampColumn;
         private System.Windows.Forms.DataGridViewTextBoxColumn valueColumn;
+        private System.Windows.Forms.Button _saveButton;
+        private System.Windows.Forms.Button _loadButton;
+        private System.Windows.Forms.Button _prevButton;
+        private System.Windows.Forms.Button _nextButton;
     }
 }
 

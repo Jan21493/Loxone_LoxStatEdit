@@ -10,6 +10,7 @@ using System.Text.RegularExpressions;
 using System.Data;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.ProgressBar;
 using System.Reflection;
+using LoxStatEdit.Properties;
 
 namespace LoxStatEdit
 {
@@ -24,7 +25,19 @@ namespace LoxStatEdit
         public LoxStatFileForm(params string[] args)
         {
             _args = args;
+
             InitializeComponent();
+
+            // Load screen sizes and settings from user config if found, otherwise use defaults
+            if (Properties.Settings.Default.IsMaximizedFileWindow)
+                WindowState = FormWindowState.Maximized;
+            else if (Screen.AllScreens.Any(screen => screen.WorkingArea.IntersectsWith(Properties.Settings.Default.FileWindowPosition))) {
+                StartPosition = FormStartPosition.Manual;
+                DesktopBounds = Properties.Settings.Default.FileWindowPosition;
+                WindowState = FormWindowState.Normal;
+            }
+            if (Properties.Settings.Default.FileWindowSplitterDistance > 0)
+                this.splitContainer.SplitterDistance = Properties.Settings.Default.FileWindowSplitterDistance;
 
             // Subscribe to the MouseClick event of the chart
             _chart.MouseClick += _chartMouseClick;
@@ -37,7 +50,7 @@ namespace LoxStatEdit
             _dataGridView.CellEndEdit += new System.Windows.Forms.DataGridViewCellEventHandler(this.DataGridView_CellEndEdit);
         }
 
-        private void LoadFile()
+        private void LoadFile(int offset = 0)
         {
             this.splitContainer.Panel1.SuspendLayout();
             this.splitContainer.Panel2.SuspendLayout();
@@ -45,13 +58,32 @@ namespace LoxStatEdit
             this.SuspendLayout();
 
             _fileNameTextBox.Text = Path.GetFullPath(_fileNameTextBox.Text);
+            // load statistics file for previous month
+            if (offset != 0) {
+                string fileName = _fileNameTextBox.Text;
+                DateTime yearMonth;
+                bool success = DateTime.TryParseExact(
+                    Path.GetExtension(fileName).Substring(1),
+                    "yyyyMM",
+                    CultureInfo.InvariantCulture,
+                    DateTimeStyles.NoCurrentDateDefault,
+                    out yearMonth);
+                if (success)
+                    _fileNameTextBox.Text = Path.GetDirectoryName(fileName) + Path.DirectorySeparatorChar + Path.GetFileNameWithoutExtension(fileName) + "." + yearMonth.AddMonths(offset).ToString("yyyyMM");
+            }
+            
             _loxStatFile = LoxStatFile.Load(_fileNameTextBox.Text);
-            _fileInfoTextBox.Text = string.Format("{0}: {1} data point{2} with {3} value{4}",
-                _loxStatFile.Text,
-                _loxStatFile.DataPoints.Count,
-                _loxStatFile.DataPoints.Count == 1 ? "" : "s",
-                _loxStatFile.ValueCount,
-                _loxStatFile.ValueCount == 1 ? "" : "s");
+            if (_loxStatFile.LoadException != null) {
+                _fileInfoTextBox.Text = "ERROR: " + _loxStatFile.LoadException.Message;
+            } else {
+                _fileInfoTextBox.Text = string.Format("{0}: {1} data point{2} with {3} value{4}",
+               _loxStatFile.Text,
+               _loxStatFile.DataPoints.Count,
+               _loxStatFile.DataPoints.Count == 1 ? "" : "s",
+               _loxStatFile.ValueCount,
+               _loxStatFile.ValueCount == 1 ? "" : "s");
+            }
+           
 
             // remove optional columns from DGV, but keep index, timestamp, value
             var columns = _dataGridView.Columns;
@@ -66,6 +98,11 @@ namespace LoxStatEdit
             for (int i = 0; i <= _valueColumnOffset; i++) {
                 columns[i].DataPropertyName = columns[i].Name;
             }
+            // new statistic files are using UTC time stamps
+            if (_loxStatFile.msStatsType > 0)
+                this.timestampColumn.HeaderText = "Timestamp (UTC)";
+            else
+                this.timestampColumn.HeaderText = "Timestamp (local)";
             // add additional columns to DGV and data table
             for (int i = _valueColumnOffset; i <= _loxStatFile.ValueCount; i++) {
                 // clone column 'Value' (no 2) and add to dgv
@@ -81,21 +118,28 @@ namespace LoxStatEdit
             _dataGridView.MultiSelect = true;
 
             // fill data table with DPs from file
-            for (int row = 0; row < _loxStatFile.DataPoints.Count; row++) {
-                var dataPoint = _loxStatFile.DataPoints[row];
-                DataRow dataRow = _dataTable.NewRow();
+            if (_loxStatFile.DataPoints != null) {
+                for (int row = 0; row < _loxStatFile.DataPoints.Count; row++) {
+                    var dataPoint = _loxStatFile.DataPoints[row];
+                    DataRow dataRow = _dataTable.NewRow();
 
-                // add data to row for each column
-                dataRow[indexColumn.Name] = dataPoint.Index;
-                dataRow[timestampColumn.Name] = dataPoint.Timestamp;
-                for (int i = 0; i < _loxStatFile.ValueCount; i++) 
-                    dataRow[columns[i + _valueColumnOffset].Name] = dataPoint.Values[i];
-                _dataTable.Rows.Add(dataRow);
+                    // add data to row for each column
+                    dataRow[indexColumn.Name] = dataPoint.Index;
+                    dataRow[timestampColumn.Name] = dataPoint.Timestamp;
+                    for (int i = 0; i < _loxStatFile.ValueCount; i++)
+                        dataRow[columns[i + _valueColumnOffset].Name] = dataPoint.Values[i];
+                    _dataTable.Rows.Add(dataRow);
+                }
+                _saveButton.Enabled = true;
+                _loadButton.Enabled = true;
+
+            } else {
+                _problemButton.Enabled = _problems.Any();
+                _saveButton.Enabled = false;
+                _loadButton.Enabled = false;
             }
             // Bind data table to DGV as data source
             _dataGridView.DataSource = _dataTable;
-
-            this.timestampColumn.HeaderText = "Timestamp";
 
             RefreshProblems();
 
@@ -118,7 +162,10 @@ namespace LoxStatEdit
 
         private void RefreshProblems()
         {
-            _problems = LoxStatProblem.GetProblems(_loxStatFile);
+            if (_loxStatFile.LoadException != null)
+                _problems = LoxStatProblem.GetProblems(_loxStatFile);
+            else 
+                _problems = new List<LoxStatProblem>();
             _problemButton.Enabled = _problems.Any();
         }
 
@@ -202,6 +249,15 @@ namespace LoxStatEdit
             LoadFile();
         }
 
+        private void PreviousButton_Click(object sender, EventArgs e) {
+
+            LoadFile(-1);
+        }
+
+        private void NextButton_Click(object sender, EventArgs e) {
+            LoadFile(1);
+        }
+
         private void DataGridView_CellValidating(object sender, DataGridViewCellValidatingEventArgs e) {
 
             int? rowIndex = e?.RowIndex;
@@ -253,7 +309,7 @@ namespace LoxStatEdit
 
             if (columnIndex == 1) {
                 dataPoint.Timestamp = Convert.ToDateTime(e.Value);
-                _dataTable.Rows[e.RowIndex][1] = Convert.ToDateTime(e.Value);
+                _dataTable.Rows[e.RowIndex][timestampColumn.Name] = Convert.ToDateTime(e.Value);
 
             } else if (columnIndex > 1) {
                 dataPoint.Values[columnIndex - _valueColumnOffset] = Convert.ToDouble(e.Value.ToString());
@@ -270,13 +326,15 @@ namespace LoxStatEdit
             {
                 ContextMenu m = new ContextMenu();
                 m.MenuItems.Add(new MenuItem("Calculate selected ...", modalCalcSelected_Click));
+                m.MenuItems.Add(new MenuItem("Interpolate selected from neighboring cells ...", modalInterpolateSelected_Click));
                 m.MenuItems.Add(new MenuItem("Calculate downwards to end of table ...", modalCalcFrom_Click));
                 m.MenuItems.Add(new MenuItem("Insert entry (row) above", modalInsertEntry_Click));
                 m.MenuItems.Add(new MenuItem("Insert entry (row) below", modalInsertEntryBelow_Click));
                 m.MenuItems.Add(new MenuItem("Delete selected entries (rows)", modalDeleteSelected_Click));
-                m.MenuItems.Add(new MenuItem("Fill and fix entries (hourly interval)", modalFillEntries_Click));
+                m.MenuItems.Add(new MenuItem("Fill and fix all entries (hourly interval)", modalFillEntries_Click));
 
                 bool allowCalcSelected = true;
+                bool allowInterpolateSelected = true;
                 bool allowCalcFrom = true;
                 bool allowInsertEntry = true;
                 bool allowDeleteSelected = true;
@@ -289,9 +347,20 @@ namespace LoxStatEdit
                     {
                         // At least one cell from the second row onwards has to be selected
                         allowCalcSelected = false;
+                        allowInterpolateSelected = false;
+                    }
+                    // first and last row have no neighbors on both sides
+                    if ((cell.RowIndex < 1) || (cell.RowIndex >= _dataGridView.Rows.Count - 1)) {
+                        // At least one cell from the second row onwards has to be selected
+                        allowInterpolateSelected = false;
                     }
                     //Console.WriteLine($"row: {cell.RowIndex}, column: {cell.ColumnIndex} is selected.");
                 }
+                // Check if at least one cell is selected
+                if (_dataGridView.SelectedCells.Count <= 0) {
+                    allowInterpolateSelected = false;
+                }
+
                 //Console.WriteLine($"Selected rows: {_dataGridView.SelectedRows.Count}");
                 //Console.WriteLine("---");
 
@@ -321,14 +390,16 @@ namespace LoxStatEdit
 
                 // Calculate selected
                 m.MenuItems[0].Enabled = allowCalcSelected;
+                // Calculate selected
+                m.MenuItems[1].Enabled = allowInterpolateSelected;
                 // Calculate downwards from this row
-                m.MenuItems[1].Enabled = allowCalcFrom;
-                // Insert entry
-                m.MenuItems[2].Enabled = allowInsertEntry;
+                m.MenuItems[2].Enabled = allowCalcFrom;
                 // Insert entry
                 m.MenuItems[3].Enabled = allowInsertEntry;
+                // Insert entry
+                m.MenuItems[4].Enabled = allowInsertEntry;
                 // Delete selected entries
-                m.MenuItems[4].Enabled = allowDeleteSelected;
+                m.MenuItems[5].Enabled = allowDeleteSelected;
 
                 // Show the context menu on mouse position
                 m.Show(_dataGridView, new Point(_dataGridView.PointToClient(Control.MousePosition).X, _dataGridView.PointToClient(Control.MousePosition).Y));
@@ -336,8 +407,7 @@ namespace LoxStatEdit
             }
         }
 
-        private void modalCalcSelected_Click(object sender, EventArgs e)
-        {
+        private void modalCalcSelected_Click(object sender, EventArgs e) {
             string chrDec = CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator;
             string chrGrp = CultureInfo.CurrentCulture.NumberFormat.NumberGroupSeparator;
             string input = "v - 100";
@@ -349,8 +419,7 @@ namespace LoxStatEdit
 
             // Show the input dialog and check the result
             DialogResult dialogResult = ShowInputDialog(ref input, this);
-            if (dialogResult == DialogResult.Cancel)
-            {
+            if (dialogResult == DialogResult.Cancel) {
                 // User clicked "Cancel" or pressed "ESC", abort the operation
                 Console.WriteLine("User cancelled the operation.");
                 return;
@@ -358,29 +427,24 @@ namespace LoxStatEdit
 
 
             // Replace comma, if it is the decimal separator
-            if (chrDec == ",")
-            {
+            if (chrDec == ",") {
                 input = Regex.Replace(input, "/.", "");
                 input = Regex.Replace(input, chrDec, chrGrp);
             }
 
             // Check if the input is a formula
             formula = Regex.Replace(input, pattern, replacement);
-            try
-            {
+            try {
                 myValue = Convert.ToDouble(new System.Data.DataTable().Compute(formula, null));
             }
-            catch (System.Data.DataException de)
-            {
+            catch (System.Data.DataException de) {
                 MessageBox.Show(de.Message);
                 isFormula = false;
             }
 
-            if (isFormula)
-            {
+            if (isFormula) {
                 // Check if at least one cell is selected
-                if (_dataGridView.SelectedCells.Count > 0)
-                {
+                if (_dataGridView.SelectedCells.Count > 0) {
                     // Show the loading form
                     var busyForm = new BusyForm {
                         // Manually set the start position
@@ -392,44 +456,103 @@ namespace LoxStatEdit
                     busyForm.Show(this); // Or busyForm.ShowDialog(this) for a modal form
                     Application.DoEvents(); // Process events to ensure the loading form is displayed
 
-                    try
-                    {
-                        foreach (DataGridViewCell cell in _dataGridView.SelectedCells)
-                        {
-                            int x = cell.RowIndex;
-                            int y = cell.ColumnIndex;
+                    try {
+                        foreach (DataGridViewCell cell in _dataGridView.SelectedCells) {
+                            int rowIndex = cell.RowIndex;
+                            int colIndex = cell.ColumnIndex;
 
                             // if a row is selected, skip first two columns
-                            if (y >= 2)
-                            {
-                                replacement = Convert.ToDouble(_dataGridView.Rows[x].Cells[y].Value).ToString("#.###", CultureInfo.CreateSpecificCulture("en-EN"));
+                            if (colIndex >= 2) {
+                                replacement = Convert.ToDouble(_dataGridView.Rows[rowIndex].Cells[colIndex].Value).ToString("#.###", CultureInfo.CreateSpecificCulture("en-EN"));
                                 formula = Regex.Replace(input, pattern, replacement);
-                                try
-                                {
+                                try {
                                     myValue = Convert.ToDouble(new System.Data.DataTable().Compute(formula, null));
                                 }
-                                catch (System.Data.DataException)
-                                {
+                                catch (System.Data.DataException) {
                                     myValue = Convert.ToDouble(replacement);
                                 }
 
-                                _dataGridView.Rows[x].Cells[y].Value = myValue.ToString();
-                                _dataTable.Rows[x][y] = myValue;
+                                _dataGridView.Rows[rowIndex].Cells[colIndex].Value = myValue.ToString();
+                                _dataTable.Rows[rowIndex][colIndex] = myValue;
                             }
                         }
                     }
-                    finally
-                    {
+                    finally {
                         // Close the loading form after the loop
                         busyForm.Close();
                     }
-                }
-                else
-                {
+                } else {
                     MessageBox.Show("Something did not match. Please try again.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
             }
 
+        }
+
+        private void modalInterpolateSelected_Click(object sender, EventArgs e) {
+
+            // insert one row above the selected row (only one row is allowed to be selected)
+            Cursor = Cursors.WaitCursor;
+
+            string chrDec = CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator;
+            string chrGrp = CultureInfo.CurrentCulture.NumberFormat.NumberGroupSeparator;
+            
+            double myValue;
+            string formula = "";
+            bool isFormula = true;
+
+
+            // Problem: SelectedRows is not sorted, so SelectedRows[0] can be the highest row that is selected!
+            // int rowIndex = _dataGridView.SelectedRows[0].Index;
+            int firstSelectedRowIndex = _dataGridView.Rows.Count;
+            int lastSelectedRowIndex = 0;
+            int selCount = _dataGridView.SelectedRows.Count;
+
+            // loop through selected rows to find first and last selected cell
+            foreach (DataGridViewCell cell in _dataGridView.SelectedCells) {
+                int rowIndex = cell.RowIndex;
+                int colIndex = cell.ColumnIndex;
+
+                // delete rows from DP list and data table
+                // get lowest selected row
+                if (rowIndex < firstSelectedRowIndex)
+                    firstSelectedRowIndex = rowIndex;
+                if (rowIndex > lastSelectedRowIndex)
+                    lastSelectedRowIndex = rowIndex;
+            }
+
+            double xOldDiff, xNewDiff;
+            double yOldDiff, newValue;
+
+            // new time stamp is before any existing data - use longest time difference to calculate linear graph
+            xOldDiff = (_dataTable.Rows[lastSelectedRowIndex + 1].Field<DateTime>("timestampColumn") - _dataTable.Rows[firstSelectedRowIndex - 1].Field<DateTime>("timestampColumn")).TotalSeconds;
+
+            foreach (DataGridViewCell cell in _dataGridView.SelectedCells) {
+                int rowIndex = cell.RowIndex;
+                int colIndex = cell.ColumnIndex;
+
+                xNewDiff = (_dataTable.Rows[rowIndex].Field<DateTime>("timestampColumn") - _dataTable.Rows[firstSelectedRowIndex - 1].Field<DateTime>("timestampColumn")).TotalSeconds;
+
+                // if a row is selected, skip first two columns - only interpolate any values
+                if (colIndex > 1) {
+
+                    yOldDiff = (double)_dataTable.Rows[lastSelectedRowIndex + 1][colIndex] - (double)_dataTable.Rows[firstSelectedRowIndex - 1][colIndex];
+
+                    if (xOldDiff > 0)
+                        newValue = Math.Round((double)_dataTable.Rows[firstSelectedRowIndex - 1][colIndex] + (yOldDiff / xOldDiff) * xNewDiff, 3);
+                    else
+                        newValue = Math.Round((double)_dataTable.Rows[firstSelectedRowIndex - 1][colIndex], 3);
+                    _dataTable.Rows[rowIndex][colIndex] = newValue;
+                    _dataGridView.Rows[rowIndex].Cells[colIndex].Value = newValue;
+
+                    var dataPoint = _loxStatFile.DataPoints[rowIndex];
+                    dataPoint.Values[colIndex - _valueColumnOffset] = newValue;
+                    
+                    
+                }
+            }
+            // update chart
+            _chart.DataBind();
+            Cursor = Cursors.Default;
         }
 
         private void modalCalcFrom_Click(object sender, EventArgs e)
@@ -871,7 +994,7 @@ namespace LoxStatEdit
             return result;
         }
 
-        private void MainForm_Load(object sender, EventArgs e)
+        private void FileForm_Load(object sender, EventArgs e)
         {
             // if not remote desktop session then enable double-buffering optimization
             if (!System.Windows.Forms.SystemInformation.TerminalServerSession)
@@ -879,12 +1002,28 @@ namespace LoxStatEdit
                 typeof(DataGridView).InvokeMember("DoubleBuffered", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.SetProperty, null, _dataGridView, new object[] { true });
             }
 
-            if((_args != null) && (_args.Length > 0))
-            {
+            // load file and fill form
+            if ((_args != null) && (_args.Length > 0)) {
                 _fileNameTextBox.Text = _args[0];
                 LoadFile();
             }
         }
+
+        private void FileForm_Closing(object sender, FormClosingEventArgs e) {
+            this.SaveWindowPosition(sender, e);
+        }
+
+        private void FileForm_ResizeEnd(object sender, EventArgs e) {
+            this.SaveWindowPosition(sender, e);
+        }
+
+        private void SaveWindowPosition(object sender, EventArgs e) {
+            Properties.Settings.Default.IsMaximizedFileWindow = WindowState == FormWindowState.Maximized;
+            Properties.Settings.Default.FileWindowPosition = DesktopBounds;
+            Properties.Settings.Default.FileWindowSplitterDistance = this.splitContainer.SplitterDistance;
+            Properties.Settings.Default.Save();
+        }
+
 
         private void SaveButton_Click(object sender, EventArgs e) {
             RefreshProblems();
