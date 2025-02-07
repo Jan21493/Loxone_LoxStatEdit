@@ -22,6 +22,7 @@ using System.ComponentModel.Design.Serialization;
 using System.Net;
 using System.Collections.ObjectModel;
 using static System.Net.WebRequestMethods;
+using System.Diagnostics.Eventing.Reader;
 
 namespace LoxStatEdit {
     public partial class LoxStatConvertForm : Form {
@@ -86,7 +87,6 @@ namespace LoxStatEdit {
         public LoxStatConvertForm(IList<MiniserverForm.FileItem> fileItems, params MiniserverForm.FileItem[] selectedFileItems) {
             // ToDo: handle more than one file - selection
             _selectedFileItems = selectedFileItems;
-            _fileItem = _selectedFileItems[0];
             _fileItems = fileItems;
             InitializeComponent();
         }
@@ -102,27 +102,30 @@ namespace LoxStatEdit {
 
         private void MainForm_Load(object sender, EventArgs e) {
 
-            // ToDo: handle multiple files - so far only _fileItem is assumed (one fileItem)
-            if ((_fileItem != null) && (_fileItem.FileName.Length > 0)) {
+            bool multipleFilesSelected = false;
 
-                // load file to get some infos
-                if (_fileItem.FileInfo != null) {
-                    
-                    fileNameTextBox.Text = _fileItem.FileInfo.FullName;
-                    _loxStatFile = LoxStatFile.Load(_fileItem.FileInfo.FullName);
-                    descriptionTextBox.Text = _fileItem.Description;
-                    fileInfoTextBox.Text = string.Format("{0}, {1} data point{2}, each with {3} value{4}",
-                                    _loxStatFile.YearMonth.ToString("yyyy-MM"),
-                                    _loxStatFile.DataPoints.Count,
-                                    _loxStatFile.DataPoints.Count == 1 ? "" : "s",
-                                    _loxStatFile.ValueCount,
-                                    _loxStatFile.ValueCount == 1 ? "" : "s");
-                } else {
-                    fileNameTextBox.Text = _fileItem.FileName;
-                    descriptionTextBox.Text = $"The file \"{_fileItem.FileName}\" cannot be converted, since it's not available on the filesystem.";
-                    fileInfoTextBox.Text = "Please download it first.";
-                }
+            if (_selectedFileItems.Length > 1) {
+                // multiple files selected - they have the same UUID (verified in MiniserverForm.cs)
+                multipleFilesSelected = true;
+                _fileItem = _selectedFileItems[0];
+                fileNameTextBox.Text = Path.GetDirectoryName(_fileItem.FileInfo.FullName) + "\\" + _fileItem.UUID + ".<multiple>";
+                descriptionTextBox.Text = _fileItem.Description;
+                fileInfoTextBox.Text = "Multiple files selected!";
+            } else {
+                // a single file was selected
+                _fileItem = _selectedFileItems[0];
+                fileNameTextBox.Text = _fileItem.FileInfo.FullName;
+                _loxStatFile = LoxStatFile.Load(_fileItem.FileInfo.FullName);
+                descriptionTextBox.Text = _fileItem.Description;
+                fileInfoTextBox.Text = string.Format("{0}, {1} data point{2}, each with {3} value{4}",
+                                _loxStatFile.YearMonth.ToString("yyyy-MM"),
+                                _loxStatFile.DataPoints.Count,
+                                _loxStatFile.DataPoints.Count == 1 ? "" : "s",
+                                _loxStatFile.ValueCount,
+                                _loxStatFile.ValueCount == 1 ? "" : "s");
             }
+
+            /////////////////////// handle multiple files ...
 
             // create a list of Loxone function blocks with UUID, description from latest file
             loxFunctionBlocks = new List<LoxFunctionBlock>();
@@ -617,14 +620,18 @@ namespace LoxStatEdit {
         private void OkButton_Click(object sender, EventArgs e) {
 
             int errorCode = 0;
-            if (modifyInfoNameRadioButton.Checked) 
-                errorCode = ModifyInfoNameForFile(_fileItem);
 
-            if (convertOldRadioButton.Checked) 
-                errorCode = ConvertOldToNewFile(_fileItem);
+            foreach (FileItem fileItem in _selectedFileItems) {
 
-            if (modifyIntervalRadioButton.Checked) 
-                errorCode = ModifyIntervalForFile(_fileItem);
+                if (modifyInfoNameRadioButton.Checked)
+                    errorCode += ModifyInfoNameForFile(fileItem);
+
+                if (convertOldRadioButton.Checked)
+                    errorCode += ConvertOldToNewFile(fileItem);
+
+                if (modifyIntervalRadioButton.Checked)
+                    errorCode += ModifyIntervalForFile(fileItem);
+            }
 
             if (errorCode == 0)
                 this.Close();

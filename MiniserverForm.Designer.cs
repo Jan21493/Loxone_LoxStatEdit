@@ -43,10 +43,10 @@ namespace LoxStatEdit
             System.Windows.Forms.Button browseFolderButton;
             System.Windows.Forms.Label filterLabel;
             System.Windows.Forms.Button filterButton;
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MiniserverForm));
             System.Windows.Forms.Button convertButton;
             System.Windows.Forms.Button deleteButton;
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MiniserverForm));
             this._urlTextBox = new System.Windows.Forms.TextBox();
             this._folderTextBox = new System.Windows.Forms.TextBox();
             this._dataGridView = new System.Windows.Forms.DataGridView();
@@ -214,6 +214,32 @@ namespace LoxStatEdit
             filterButton.UseVisualStyleBackColor = true;
             filterButton.Click += new System.EventHandler(this.FilterButton_Click);
             // 
+            // convertButton
+            // 
+            convertButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            convertButton.Location = new System.Drawing.Point(736, 527);
+            convertButton.Margin = new System.Windows.Forms.Padding(6);
+            convertButton.Name = "convertButton";
+            convertButton.Size = new System.Drawing.Size(110, 23);
+            convertButton.TabIndex = 107;
+            convertButton.Text = "&Convert selected...";
+            this.toolTip.SetToolTip(convertButton, "Convert selected statistic files (ALT + C)");
+            convertButton.UseVisualStyleBackColor = true;
+            convertButton.Click += new System.EventHandler(this.ConvertButton_Click);
+            // 
+            // deleteButton
+            // 
+            deleteButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            deleteButton.Location = new System.Drawing.Point(853, 527);
+            deleteButton.Margin = new System.Windows.Forms.Padding(6);
+            deleteButton.Name = "deleteButton";
+            deleteButton.Size = new System.Drawing.Size(105, 23);
+            deleteButton.TabIndex = 108;
+            deleteButton.Text = "Dele&te selected...";
+            this.toolTip.SetToolTip(deleteButton, "Delete selected statistic files (ALT + T)");
+            deleteButton.UseVisualStyleBackColor = true;
+            deleteButton.Click += new System.EventHandler(this.DeleteButton_Click);
+            // 
             // _urlTextBox
             // 
             this._urlTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
@@ -293,8 +319,8 @@ namespace LoxStatEdit
             // _yearMonthCol
             // 
             this._yearMonthCol.DataPropertyName = "YearMonth";
-            dataGridViewCellStyle8.Format = "yyyy-MM";
-            this._yearMonthCol.DefaultCellStyle = dataGridViewCellStyle8;
+            dataGridViewCellStyle1.Format = "yyyy-MM";
+            this._yearMonthCol.DefaultCellStyle = dataGridViewCellStyle1;
             this._yearMonthCol.HeaderText = "Year/Month";
             this._yearMonthCol.MinimumWidth = 10;
             this._yearMonthCol.Name = "_yearMonthCol";
@@ -458,32 +484,6 @@ namespace LoxStatEdit
             this._clearFilterButton.UseVisualStyleBackColor = true;
             this._clearFilterButton.Click += new System.EventHandler(this.ClearFilterButton_Click);
             // 
-            // convertButton
-            // 
-            convertButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            convertButton.Location = new System.Drawing.Point(736, 527);
-            convertButton.Margin = new System.Windows.Forms.Padding(6);
-            convertButton.Name = "convertButton";
-            convertButton.Size = new System.Drawing.Size(110, 23);
-            convertButton.TabIndex = 107;
-            convertButton.Text = "&Convert selected...";
-            this.toolTip.SetToolTip(convertButton, "Convert selected statistic files (ALT + C)");
-            convertButton.UseVisualStyleBackColor = true;
-            convertButton.Click += new System.EventHandler(this.ConvertButton_Click);
-            // 
-            // deleteButton
-            // 
-            deleteButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            deleteButton.Location = new System.Drawing.Point(853, 527);
-            deleteButton.Margin = new System.Windows.Forms.Padding(6);
-            deleteButton.Name = "deleteButton";
-            deleteButton.Size = new System.Drawing.Size(105, 23);
-            deleteButton.TabIndex = 108;
-            deleteButton.Text = "Dele&te selected...";
-            this.toolTip.SetToolTip(deleteButton, "Delete selected statistic files (ALT + T)");
-            deleteButton.UseVisualStyleBackColor = true;
-            deleteButton.Click += new System.EventHandler(this.DeleteButton_Click);
-            // 
             // MiniserverForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -530,7 +530,6 @@ namespace LoxStatEdit
 
         private System.Windows.Forms.TextBox _urlTextBox;
         private System.Windows.Forms.TextBox _folderTextBox;
-        private System.Windows.Forms.DataGridView _dataGridView;
         private LinkLabel githubLabel;
         private ToolTip toolTip;
         private LinkLabel donateLabel;
@@ -550,5 +549,6 @@ namespace LoxStatEdit
         private DataGridViewButtonColumn _deleteCol;
         private ComboBox _filterComboBox;
         private Button _clearFilterButton;
+        public DataGridView _dataGridView;
     }
 }

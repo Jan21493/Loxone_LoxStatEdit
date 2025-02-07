@@ -21,10 +21,14 @@ namespace LoxStatEdit
         LoxStatFile _loxStatFile;
         IList<LoxStatProblem> _problems;
         DataTable _dataTable;
+        MiniserverForm _parent;
+        IList<MiniserverForm.FileItem> _fileItems;
 
-        public LoxStatFileForm(params string[] args)
+        public LoxStatFileForm(MiniserverForm parent, IList<MiniserverForm.FileItem> fileItems, params string[] args)
         {
+            _parent = parent;
             _args = args;
+            _fileItems = fileItems;
 
             InitializeComponent();
 
@@ -251,11 +255,40 @@ namespace LoxStatEdit
 
         private void PreviousButton_Click(object sender, EventArgs e) {
 
-            LoadFile(-1);
+            // move selection in main window up
+            DataGridView dgv = _parent.DGV;
+            int selectedRowIndex = 0;
+
+            // only one row is selected when EDIT button was pressed
+            if (dgv.SelectedRows.Count == 1)
+                selectedRowIndex = dgv.SelectedRows[0].Index;
+            // move selection upwards
+            if (selectedRowIndex > 0) {
+                dgv.Rows[selectedRowIndex].Selected = false;
+                dgv.Rows[selectedRowIndex - 1].Selected = true;
+                dgv.CurrentCell = dgv.Rows[selectedRowIndex - 1].Cells[0];
+                _fileNameTextBox.Text = _fileItems[selectedRowIndex - 1].FileInfo.FullName;
+            }
+            LoadFile();
         }
 
         private void NextButton_Click(object sender, EventArgs e) {
-            LoadFile(1);
+
+            // move selection in main window up
+            DataGridView dgv = _parent.DGV;
+            int selectedRowIndex = dgv.Rows.Count;
+
+            // only one row is selected when EDIT button was pressed
+            if (dgv.SelectedRows.Count == 1)
+                selectedRowIndex = dgv.SelectedRows[0].Index;
+            // move selection downwards
+            if (selectedRowIndex < dgv.Rows.Count - 1) {
+                dgv.Rows[selectedRowIndex].Selected = false;
+                dgv.Rows[selectedRowIndex + 1].Selected = true;
+                dgv.CurrentCell = dgv.Rows[selectedRowIndex + 1].Cells[0];
+                _fileNameTextBox.Text = _fileItems[selectedRowIndex + 1].FileInfo.FullName;
+            }
+            LoadFile();
         }
 
         private void DataGridView_CellValidating(object sender, DataGridViewCellValidatingEventArgs e) {

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -277,6 +278,12 @@ namespace LoxStatEdit
         #endregion
 
         #region Methods
+
+        public DataGridView DGV {
+            get {
+                return _dataGridView;
+            }
+        }
 
         private void RefreshGridView() {
             // Show the loading form
@@ -955,7 +962,7 @@ namespace LoxStatEdit
                     }
 
                     //Console.WriteLine(fileItem.FileInfo.FullName);
-                    using (var form = new LoxStatFileForm(fileItem.FileInfo.FullName)) {
+                    using (LoxStatFileForm form = new LoxStatFileForm(this, _fileItems, fileItem.FileInfo.FullName)) {
                         // Calculate the new location
                         System.Drawing.Rectangle fileWindowRect = Properties.Settings.Default.FileWindowPosition;
                         if (fileWindowRect.Top == 0) {
@@ -1133,7 +1140,53 @@ namespace LoxStatEdit
 
         private void ConvertButton_Click(object sender, EventArgs e) {
 
-        }
+            // build a list of file names and file items for selected rows
+            IList<FileItem> selectedFileItems = new List<FileItem>();
+            IList<string> selectedFileNames = new List<string>();
+
+            string uuid = ""; 
+            foreach (DataGridViewRow row in _dataGridView.SelectedRows) {
+                int rowIndex = row.Index; // Capture the index for the closure
+                selectedFileItems.Add(_fileItems[rowIndex]);
+                selectedFileNames.Add(_fileItems[rowIndex].FileName);
+                if (uuid == "") {
+                    uuid = _fileItems[rowIndex].UUID;
+                }
+                else if (uuid != _fileItems[rowIndex].UUID) {
+                    MessageBox.Show($"You can only convert files with the same UUID,\n" +
+                        "but multiple UUIS's were selected!",
+                        "Error - Multiple UUID's selected", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+                if (_fileItems[rowIndex].FileInfo == null) {
+                    MessageBox.Show($"All files must be available on the local filesystem to be converted,\n" +
+                        $"but file \"{_fileItems[rowIndex].FileName}\" is missing. Please download it (and all other files) first.",
+                        "Error - Conversion cancelled", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+            }
+            if ((selectedFileItems == null) || (selectedFileItems.Count == 0)) {
+                MessageBox.Show($"Conversion cancelled, because no files were selected.",
+                    "Error - No files selected", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            // Show dialog to convert all selected files
+      
+            using (var form = new LoxStatConvertForm(GetFilteredLocalFileItems(), selectedFileItems.ToArray())) {
+                // Calculate the new location
+                int offsetX = 100; // Horizontal offset from the parent form
+                int offsetY = 50; // Vertical offset from the parent form
+                form.StartPosition = FormStartPosition.Manual; // Allows manual positioning
+                form.Location = new System.Drawing.Point(this.Location.X + offsetX, this.Location.Y + offsetY);
+
+                // Show the form as a dialog
+                form.ShowDialog(this);
+            }
+            RefreshLocal();
+            RefreshGridView();
+
+        } // end of ConvertButton_Click
 
         private void DeleteButton_Click(object sender, EventArgs e) {
 
@@ -1146,7 +1199,6 @@ namespace LoxStatEdit
                 selectedFileItems.Add(_fileItems[rowIndex]);
                 selectedFileNames.Add(_fileItems[rowIndex].FileName);
             }
-            // return fileItems.OrderBy(f => f.FileInfo?.Name).ToList();
 
             // Delete all selected files after dialog to confirm
             if ((selectedFileItems.Count > 0)) {

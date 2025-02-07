@@ -51,9 +51,9 @@
             this._fileNameTextBox = new System.Windows.Forms.TextBox();
             this._chart = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.toolTip = new System.Windows.Forms.ToolTip(this.components);
-            this.splitContainer = new System.Windows.Forms.SplitContainer();
             this._prevButton = new System.Windows.Forms.Button();
             this._nextButton = new System.Windows.Forms.Button();
+            this.splitContainer = new System.Windows.Forms.SplitContainer();
             fileInfoLabel = new System.Windows.Forms.Label();
             browseButton = new System.Windows.Forms.Button();
             fileNameLabel = new System.Windows.Forms.Label();
@@ -72,6 +72,26 @@
             fileInfoLabel.Size = new System.Drawing.Size(60, 13);
             fileInfoLabel.TabIndex = 4;
             fileInfoLabel.Text = "File Info:";
+            // 
+            // browseButton
+            // 
+            browseButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            browseButton.Location = new System.Drawing.Point(716, 11);
+            browseButton.Name = "browseButton";
+            browseButton.Size = new System.Drawing.Size(75, 23);
+            browseButton.TabIndex = 2;
+            browseButton.Text = "&Browse...";
+            this.toolTip.SetToolTip(browseButton, "Browse local statistic files (ALT + B)");
+            browseButton.UseVisualStyleBackColor = true;
+            browseButton.Click += new System.EventHandler(this.BrowseButton_Click);
+            // 
+            // fileNameLabel
+            // 
+            fileNameLabel.Location = new System.Drawing.Point(12, 17);
+            fileNameLabel.Name = "fileNameLabel";
+            fileNameLabel.Size = new System.Drawing.Size(60, 13);
+            fileNameLabel.TabIndex = 0;
+            fileNameLabel.Text = "File Name:";
             // 
             // _saveButton
             // 
@@ -96,26 +116,6 @@
             this.toolTip.SetToolTip(this._loadButton, "Load selected statistic file (ALT + L)");
             this._loadButton.UseVisualStyleBackColor = true;
             this._loadButton.Click += new System.EventHandler(this.LoadButton_Click);
-            // 
-            // browseButton
-            // 
-            browseButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            browseButton.Location = new System.Drawing.Point(716, 11);
-            browseButton.Name = "browseButton";
-            browseButton.Size = new System.Drawing.Size(75, 23);
-            browseButton.TabIndex = 2;
-            browseButton.Text = "&Browse...";
-            this.toolTip.SetToolTip(browseButton, "Browse local statistic files (ALT + B)");
-            browseButton.UseVisualStyleBackColor = true;
-            browseButton.Click += new System.EventHandler(this.BrowseButton_Click);
-            // 
-            // fileNameLabel
-            // 
-            fileNameLabel.Location = new System.Drawing.Point(12, 17);
-            fileNameLabel.Name = "fileNameLabel";
-            fileNameLabel.Size = new System.Drawing.Size(60, 13);
-            fileNameLabel.TabIndex = 0;
-            fileNameLabel.Text = "File Name:";
             // 
             // _problemButton
             // 
@@ -247,9 +247,33 @@
             series1.Legend = "Legend1";
             series1.Name = "Series1";
             this._chart.Series.Add(series1);
-            this._chart.Size = new System.Drawing.Size(564, 483);
+            this._chart.Size = new System.Drawing.Size(562, 483);
             this._chart.TabIndex = 9;
             this._chart.Text = "chart1";
+            // 
+            // _prevButton
+            // 
+            this._prevButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this._prevButton.Location = new System.Drawing.Point(636, 11);
+            this._prevButton.Name = "_prevButton";
+            this._prevButton.Size = new System.Drawing.Size(75, 23);
+            this._prevButton.TabIndex = 11;
+            this._prevButton.Text = "&Previous";
+            this.toolTip.SetToolTip(this._prevButton, "Load previous statistics file from list in main window (ALT + P)");
+            this._prevButton.UseVisualStyleBackColor = true;
+            this._prevButton.Click += new System.EventHandler(this.PreviousButton_Click);
+            // 
+            // _nextButton
+            // 
+            this._nextButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this._nextButton.Location = new System.Drawing.Point(636, 38);
+            this._nextButton.Name = "_nextButton";
+            this._nextButton.Size = new System.Drawing.Size(75, 23);
+            this._nextButton.TabIndex = 12;
+            this._nextButton.Text = "&Next";
+            this.toolTip.SetToolTip(this._nextButton, "Load next statistics file from list in main window (ALT + N)");
+            this._nextButton.UseVisualStyleBackColor = true;
+            this._nextButton.Click += new System.EventHandler(this.NextButton_Click);
             // 
             // splitContainer
             // 
@@ -271,30 +295,6 @@
             this.splitContainer.SplitterDistance = 286;
             this.splitContainer.SplitterWidth = 6;
             this.splitContainer.TabIndex = 10;
-            // 
-            // _prevButton
-            // 
-            this._prevButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this._prevButton.Location = new System.Drawing.Point(636, 11);
-            this._prevButton.Name = "_prevButton";
-            this._prevButton.Size = new System.Drawing.Size(75, 23);
-            this._prevButton.TabIndex = 11;
-            this._prevButton.Text = "&Previous";
-            this.toolTip.SetToolTip(this._prevButton, "Load local statistic file for previous month (ALT + P)");
-            this._prevButton.UseVisualStyleBackColor = true;
-            this._prevButton.Click += new System.EventHandler(this.PreviousButton_Click);
-            // 
-            // _nextButton
-            // 
-            this._nextButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this._nextButton.Location = new System.Drawing.Point(636, 38);
-            this._nextButton.Name = "_nextButton";
-            this._nextButton.Size = new System.Drawing.Size(75, 23);
-            this._nextButton.TabIndex = 12;
-            this._nextButton.Text = "&Next";
-            this.toolTip.SetToolTip(this._nextButton, "Load statistic file for next month (ALT + N)");
-            this._nextButton.UseVisualStyleBackColor = true;
-            this._nextButton.Click += new System.EventHandler(this.NextButton_Click);
             // 
             // LoxStatFileForm
             // 
