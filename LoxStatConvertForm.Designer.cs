@@ -41,6 +41,7 @@
             System.Windows.Forms.Label newDescriptionLabel;
             System.Windows.Forms.Label infoLabel;
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(LoxStatConvertForm));
+            System.Windows.Forms.Label timeZonelabel;
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.descriptionTextBox = new System.Windows.Forms.TextBox();
             this.fileNameTextBox = new System.Windows.Forms.TextBox();
@@ -62,6 +63,8 @@
             this.newDescriptionTextBox = new System.Windows.Forms.TextBox();
             this.modifyNameGroupBox = new System.Windows.Forms.GroupBox();
             this.fileInfoTextBox = new System.Windows.Forms.TextBox();
+            this.timeZoneComboBox = new System.Windows.Forms.ComboBox();
+            this.useDSTcheckBox = new System.Windows.Forms.CheckBox();
             fileInfoLabel = new System.Windows.Forms.Label();
             CancelButton = new System.Windows.Forms.Button();
             fileNameLabel = new System.Windows.Forms.Label();
@@ -73,6 +76,7 @@
             changeIntervalTolabel = new System.Windows.Forms.Label();
             newDescriptionLabel = new System.Windows.Forms.Label();
             infoLabel = new System.Windows.Forms.Label();
+            timeZonelabel = new System.Windows.Forms.Label();
             this.convertOldGroupBox.SuspendLayout();
             this.modifyIntervalGroupBox.SuspendLayout();
             this.modifyNameGroupBox.SuspendLayout();
@@ -91,10 +95,10 @@
             // 
             CancelButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             CancelButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            CancelButton.Location = new System.Drawing.Point(566, 537);
+            CancelButton.Location = new System.Drawing.Point(566, 607);
             CancelButton.Name = "CancelButton";
             CancelButton.Size = new System.Drawing.Size(75, 23);
-            CancelButton.TabIndex = 26;
+            CancelButton.TabIndex = 29;
             CancelButton.Text = "C&ancel";
             this.toolTip.SetToolTip(CancelButton, "Cancel any conversion (ALT + C)");
             CancelButton.UseVisualStyleBackColor = true;
@@ -112,10 +116,10 @@
             // OkButton
             // 
             OkButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            OkButton.Location = new System.Drawing.Point(475, 537);
+            OkButton.Location = new System.Drawing.Point(475, 607);
             OkButton.Name = "OkButton";
             OkButton.Size = new System.Drawing.Size(75, 23);
-            OkButton.TabIndex = 25;
+            OkButton.TabIndex = 28;
             OkButton.Text = "&OK";
             this.toolTip.SetToolTip(OkButton, "Convert statistics file(s) with selected settings (ALT + O)");
             OkButton.UseVisualStyleBackColor = true;
@@ -160,10 +164,10 @@
             // 
             // changeIntervalTolabel
             // 
-            changeIntervalTolabel.Location = new System.Drawing.Point(11, 19);
+            changeIntervalTolabel.Location = new System.Drawing.Point(11, 18);
             changeIntervalTolabel.Name = "changeIntervalTolabel";
             changeIntervalTolabel.Size = new System.Drawing.Size(220, 21);
-            changeIntervalTolabel.TabIndex = 22;
+            changeIntervalTolabel.TabIndex = 25;
             changeIntervalTolabel.Text = "Change recording interval to:";
             changeIntervalTolabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
@@ -228,10 +232,10 @@
             // modifyIntervalRadioButton
             // 
             this.modifyIntervalRadioButton.AutoSize = true;
-            this.modifyIntervalRadioButton.Location = new System.Drawing.Point(16, 345);
+            this.modifyIntervalRadioButton.Location = new System.Drawing.Point(16, 424);
             this.modifyIntervalRadioButton.Name = "modifyIntervalRadioButton";
             this.modifyIntervalRadioButton.Size = new System.Drawing.Size(198, 17);
-            this.modifyIntervalRadioButton.TabIndex = 20;
+            this.modifyIntervalRadioButton.TabIndex = 23;
             this.modifyIntervalRadioButton.Text = "Modify interval (see tooltip for details)";
             this.toolTip.SetToolTip(this.modifyIntervalRadioButton, resources.GetString("modifyIntervalRadioButton.ToolTip"));
             this.modifyIntervalRadioButton.UseVisualStyleBackColor = true;
@@ -287,6 +291,9 @@
             // 
             // convertOldGroupBox
             // 
+            this.convertOldGroupBox.Controls.Add(this.useDSTcheckBox);
+            this.convertOldGroupBox.Controls.Add(this.timeZoneComboBox);
+            this.convertOldGroupBox.Controls.Add(timeZonelabel);
             this.convertOldGroupBox.Controls.Add(this.powerIntervalComboBox);
             this.convertOldGroupBox.Controls.Add(this.value2RadioButton);
             this.convertOldGroupBox.Controls.Add(this.value1RadioButton);
@@ -299,7 +306,7 @@
             this.convertOldGroupBox.Controls.Add(changeIntervalLabel);
             this.convertOldGroupBox.Location = new System.Drawing.Point(10, 158);
             this.convertOldGroupBox.Name = "convertOldGroupBox";
-            this.convertOldGroupBox.Size = new System.Drawing.Size(667, 181);
+            this.convertOldGroupBox.Size = new System.Drawing.Size(667, 257);
             this.convertOldGroupBox.TabIndex = 9;
             this.convertOldGroupBox.TabStop = false;
             // 
@@ -352,10 +359,10 @@
             // 
             this.modifyIntervalGroupBox.Controls.Add(this.newIntervalComboBox);
             this.modifyIntervalGroupBox.Controls.Add(changeIntervalTolabel);
-            this.modifyIntervalGroupBox.Location = new System.Drawing.Point(10, 359);
+            this.modifyIntervalGroupBox.Location = new System.Drawing.Point(10, 438);
             this.modifyIntervalGroupBox.Name = "modifyIntervalGroupBox";
             this.modifyIntervalGroupBox.Size = new System.Drawing.Size(667, 51);
-            this.modifyIntervalGroupBox.TabIndex = 21;
+            this.modifyIntervalGroupBox.TabIndex = 24;
             this.modifyIntervalGroupBox.TabStop = false;
             // 
             // newIntervalComboBox
@@ -368,21 +375,21 @@
             "Interval 15 minutes",
             "Interval 30 minutes",
             "Interval 60 minutes"});
-            this.newIntervalComboBox.Location = new System.Drawing.Point(237, 19);
+            this.newIntervalComboBox.Location = new System.Drawing.Point(237, 18);
             this.newIntervalComboBox.Name = "newIntervalComboBox";
             this.newIntervalComboBox.Size = new System.Drawing.Size(419, 21);
-            this.newIntervalComboBox.TabIndex = 23;
+            this.newIntervalComboBox.TabIndex = 26;
             // 
             // disclaimerTextBox
             // 
             this.disclaimerTextBox.BackColor = System.Drawing.SystemColors.ControlLightLight;
-            this.disclaimerTextBox.Location = new System.Drawing.Point(10, 431);
+            this.disclaimerTextBox.Location = new System.Drawing.Point(10, 503);
             this.disclaimerTextBox.Multiline = true;
             this.disclaimerTextBox.Name = "disclaimerTextBox";
             this.disclaimerTextBox.ReadOnly = true;
             this.disclaimerTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.disclaimerTextBox.Size = new System.Drawing.Size(667, 91);
-            this.disclaimerTextBox.TabIndex = 24;
+            this.disclaimerTextBox.TabIndex = 27;
             this.disclaimerTextBox.Text = resources.GetString("disclaimerTextBox.Text");
             // 
             // newDescriptionTextBox
@@ -419,12 +426,47 @@
             this.fileInfoTextBox.TabIndex = 27;
             this.fileInfoTextBox.Text = "info to file";
             // 
+            // timeZoneComboBox
+            // 
+            this.timeZoneComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.timeZoneComboBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
+            this.timeZoneComboBox.FormattingEnabled = true;
+            this.timeZoneComboBox.Items.AddRange(new object[] {
+            "List of UUIDs"});
+            this.timeZoneComboBox.Location = new System.Drawing.Point(14, 201);
+            this.timeZoneComboBox.Name = "timeZoneComboBox";
+            this.timeZoneComboBox.Size = new System.Drawing.Size(642, 21);
+            this.timeZoneComboBox.TabIndex = 21;
+            this.timeZoneComboBox.SelectionChangeCommitted += new System.EventHandler(this.timeZoneComboBox_SelectionChangeCommitted);
+            // 
+            // timeZonelabel
+            // 
+            timeZonelabel.Location = new System.Drawing.Point(11, 176);
+            timeZonelabel.Name = "timeZonelabel";
+            timeZonelabel.Size = new System.Drawing.Size(483, 21);
+            timeZonelabel.TabIndex = 20;
+            timeZonelabel.Text = "Select the local time zone where the MS is located: (see tootip for details)";
+            timeZonelabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.toolTip.SetToolTip(timeZonelabel, "All time stamps can be converted from a local time zone to UTC. If you don\'t want" +
+        " to convert any time stamps,\r\nselect \'Do not convert any time stamps\' from the d" +
+        "rop down list.");
+            // 
+            // useDSTcheckBox
+            // 
+            this.useDSTcheckBox.AutoSize = true;
+            this.useDSTcheckBox.Location = new System.Drawing.Point(25, 229);
+            this.useDSTcheckBox.Name = "useDSTcheckBox";
+            this.useDSTcheckBox.Size = new System.Drawing.Size(256, 17);
+            this.useDSTcheckBox.TabIndex = 22;
+            this.useDSTcheckBox.Text = "Use daylight saving time with selected time zone.";
+            this.useDSTcheckBox.UseVisualStyleBackColor = true;
+            // 
             // LoxStatConvertForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = CancelButton;
-            this.ClientSize = new System.Drawing.Size(687, 570);
+            this.ClientSize = new System.Drawing.Size(687, 642);
             this.Controls.Add(this.fileInfoTextBox);
             this.Controls.Add(infoLabel);
             this.Controls.Add(this.modifyIntervalRadioButton);
@@ -481,6 +523,8 @@
         private System.Windows.Forms.TextBox newDescriptionTextBox;
         private System.Windows.Forms.GroupBox modifyNameGroupBox;
         private System.Windows.Forms.TextBox fileInfoTextBox;
+        private System.Windows.Forms.CheckBox useDSTcheckBox;
+        private System.Windows.Forms.ComboBox timeZoneComboBox;
     }
 }
 

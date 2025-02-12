@@ -54,6 +54,7 @@
             this._prevButton = new System.Windows.Forms.Button();
             this._nextButton = new System.Windows.Forms.Button();
             this.splitContainer = new System.Windows.Forms.SplitContainer();
+            this.disclaimerTextBox = new System.Windows.Forms.TextBox();
             fileInfoLabel = new System.Windows.Forms.Label();
             browseButton = new System.Windows.Forms.Button();
             fileNameLabel = new System.Windows.Forms.Label();
@@ -157,7 +158,7 @@
             this._dataGridView.Location = new System.Drawing.Point(0, 0);
             this._dataGridView.Name = "_dataGridView";
             this._dataGridView.RowHeadersWidth = 30;
-            this._dataGridView.Size = new System.Drawing.Size(286, 483);
+            this._dataGridView.Size = new System.Drawing.Size(286, 386);
             this._dataGridView.TabIndex = 8;
             this._dataGridView.VirtualMode = true;
             this._dataGridView.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.DataGridView_CellContentClick);
@@ -247,7 +248,7 @@
             series1.Legend = "Legend1";
             series1.Name = "Series1";
             this._chart.Series.Add(series1);
-            this._chart.Size = new System.Drawing.Size(562, 483);
+            this._chart.Size = new System.Drawing.Size(560, 386);
             this._chart.TabIndex = 9;
             this._chart.Text = "chart1";
             // 
@@ -291,16 +292,31 @@
             // splitContainer.Panel2
             // 
             this.splitContainer.Panel2.Controls.Add(this._chart);
-            this.splitContainer.Size = new System.Drawing.Size(860, 483);
+            this.splitContainer.Size = new System.Drawing.Size(860, 386);
             this.splitContainer.SplitterDistance = 286;
             this.splitContainer.SplitterWidth = 6;
             this.splitContainer.TabIndex = 10;
+            // 
+            // disclaimerTextBox
+            // 
+            this.disclaimerTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.disclaimerTextBox.BackColor = System.Drawing.SystemColors.ControlLightLight;
+            this.disclaimerTextBox.Location = new System.Drawing.Point(12, 458);
+            this.disclaimerTextBox.Multiline = true;
+            this.disclaimerTextBox.Name = "disclaimerTextBox";
+            this.disclaimerTextBox.ReadOnly = true;
+            this.disclaimerTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.disclaimerTextBox.Size = new System.Drawing.Size(859, 91);
+            this.disclaimerTextBox.TabIndex = 28;
+            this.disclaimerTextBox.Text = resources.GetString("disclaimerTextBox.Text");
             // 
             // LoxStatFileForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(884, 561);
+            this.Controls.Add(this.disclaimerTextBox);
             this.Controls.Add(this._nextButton);
             this.Controls.Add(this._prevButton);
             this.Controls.Add(this.splitContainer);
@@ -349,6 +365,7 @@
         private System.Windows.Forms.Button _loadButton;
         private System.Windows.Forms.Button _prevButton;
         private System.Windows.Forms.Button _nextButton;
+        private System.Windows.Forms.TextBox disclaimerTextBox;
     }
 }
 

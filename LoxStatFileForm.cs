@@ -166,7 +166,7 @@ namespace LoxStatEdit
 
         private void RefreshProblems()
         {
-            if (_loxStatFile.LoadException != null)
+            if (_loxStatFile.LoadException == null)
                 _problems = LoxStatProblem.GetProblems(_loxStatFile);
             else 
                 _problems = new List<LoxStatProblem>();
@@ -461,7 +461,7 @@ namespace LoxStatEdit
 
             // Replace comma, if it is the decimal separator
             if (chrDec == ",") {
-                input = Regex.Replace(input, "/.", "");
+                input = Regex.Replace(input, @"\.", "");
                 input = Regex.Replace(input, chrDec, chrGrp);
             }
 
@@ -488,6 +488,7 @@ namespace LoxStatEdit
                     busyForm.Top = parent.Top + (parent.Height - busyForm.Height) / 2;
                     busyForm.Show(this); // Or busyForm.ShowDialog(this) for a modal form
                     Application.DoEvents(); // Process events to ensure the loading form is displayed
+                    CultureInfo enCultureInfo = CultureInfo.CreateSpecificCulture("en-EN");
 
                     try {
                         foreach (DataGridViewCell cell in _dataGridView.SelectedCells) {
@@ -496,29 +497,34 @@ namespace LoxStatEdit
 
                             // if a row is selected, skip first two columns
                             if (colIndex >= 2) {
-                                replacement = Convert.ToDouble(_dataGridView.Rows[rowIndex].Cells[colIndex].Value).ToString("#.###", CultureInfo.CreateSpecificCulture("en-EN"));
+                                replacement = Convert.ToDouble(_dataGridView.Rows[rowIndex].Cells[colIndex].Value).ToString("0.#########", enCultureInfo);
                                 formula = Regex.Replace(input, pattern, replacement);
                                 try {
-                                    myValue = Convert.ToDouble(new System.Data.DataTable().Compute(formula, null));
+                                    myValue = Convert.ToDouble(new System.Data.DataTable().Compute(formula, null), enCultureInfo);
                                 }
                                 catch (System.Data.DataException) {
-                                    myValue = Convert.ToDouble(replacement);
+                                    myValue = Convert.ToDouble(replacement, enCultureInfo);
                                 }
 
-                                _dataGridView.Rows[rowIndex].Cells[colIndex].Value = myValue.ToString();
+                                //_dataGridView.Rows[rowIndex].Cells[colIndex].Value = myValue.ToString();
                                 _dataTable.Rows[rowIndex][colIndex] = myValue;
+                                var dataPoint = _loxStatFile.DataPoints[rowIndex];
+                                dataPoint.Values[colIndex - _valueColumnOffset] = myValue;
                             }
                         }
                     }
                     finally {
                         // Close the loading form after the loop
+
                         busyForm.Close();
                     }
+                    // update chart
+                    _chart.DataBind();
                 } else {
                     MessageBox.Show("Something did not match. Please try again.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
             }
-
+            Cursor = Cursors.Default;
         }
 
         private void modalInterpolateSelected_Click(object sender, EventArgs e) {
@@ -680,6 +686,8 @@ namespace LoxStatEdit
                         // Close the loading form after the loop
                         busyForm.Close();
                     }
+                    // update chart
+                    _chart.DataBind();
                 }
                 else
                 {
@@ -1054,6 +1062,7 @@ namespace LoxStatEdit
             RefreshProblems();
             if(_problems.Any())
                 ShowProblems();
+            /*
             if(MessageBox.Show(
                 this,
                 "### DISCLAIMER ###\n" + 
@@ -1081,7 +1090,7 @@ namespace LoxStatEdit
                 MessageBoxDefaultButton.Button2
                 ) != DialogResult.Yes)
                 return;
-            _loxStatFile.FileName = Path.GetFullPath(_fileNameTextBox.Text);
+            _loxStatFile.FileName = Path.GetFullPath(_fileNameTextBox.Text);*/
             _loxStatFile.Save();
             //MessageBox.Show(this, "Save successful!", Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
         }

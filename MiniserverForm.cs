@@ -413,7 +413,7 @@ namespace LoxStatEdit
                     DataPropertyName = "Convert",
                     HeaderText = "Convert",
                     Width = 60,
-                    ToolTipText = "Convert data from old meter function block to new style.\n\nNOTE: UNDER CONSTRUCTION, not working yet!"
+                    ToolTipText = "Convert data from old meter function block to new style."
                 });
                 _dataGridView.Columns.Add(new DataGridViewButtonColumn {
                     DataPropertyName = "Delete",
@@ -1026,7 +1026,7 @@ namespace LoxStatEdit
                     }
                     RefreshLocal();
                     RefreshGridView();
-
+                    /*
                     // ToDo: move code for conversion to convert function
                     if (Convert(fileItem)) {
                         progressBar.Value = 1;
@@ -1038,7 +1038,7 @@ namespace LoxStatEdit
                         progressBar.Value = 1;
                         progressBar.SetState(2);
                         progressLabel.Text = "Converting failed!";
-                    }
+                    }*/
                     break;
                 case 10: //Delete
                     // show error message, if there is no file to upload
@@ -1140,6 +1140,7 @@ namespace LoxStatEdit
 
         private void ConvertButton_Click(object sender, EventArgs e) {
 
+            Console.WriteLine("Start of ConvertButton_Click");
             // build a list of file names and file items for selected rows
             IList<FileItem> selectedFileItems = new List<FileItem>();
             IList<string> selectedFileNames = new List<string>();
@@ -1185,6 +1186,7 @@ namespace LoxStatEdit
             }
             RefreshLocal();
             RefreshGridView();
+            Console.WriteLine("End of ConvertButton_Click");
 
         } // end of ConvertButton_Click
 
