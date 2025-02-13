@@ -334,17 +334,17 @@ namespace LoxStatEdit {
 
             // load existing statistics file
             _loxStatFile = LoxStatFile.Load(fileItem.FileInfo.FullName);
-            Console.WriteLine("----------------------------------------------------------------------------------------------------------------");
-            Console.WriteLine("Reading old format from existing file: {0} ", fileItem.FileInfo.FullName);
+            //Console.WriteLine("----------------------------------------------------------------------------------------------------------------");
+            //Console.WriteLine("Reading old format from existing file: {0} ", fileItem.FileInfo.FullName);
 
             // load existing statistics file for next month - due to time conversion from local time to UTC
             string nextMonthFileName = Path.GetDirectoryName(fileItem.FileInfo.FullName) + "\\" + Path.GetFileNameWithoutExtension(fileItem.FileInfo.FullName) + "." + _loxStatFile.YearMonth.AddMonths(1).ToString("yyyyMM");
             LoxStatFile _nextMonthLoxStatFile = LoxStatFile.Load(nextMonthFileName);
-            Console.WriteLine("Reading existing file for next month: {0} ", nextMonthFileName);
+            //Console.WriteLine("Reading existing file for next month: {0} ", nextMonthFileName);
 
             // compose new file name from old name (path, extension) plus UUID_x
             string newFileName = Path.GetDirectoryName(fileItem.FileInfo.FullName) + "\\" + loxFunctionBlock.UUID + "_" + fileNo.ToString() + Path.GetExtension(fileItem.FileInfo.FullName);
-            Console.WriteLine("Writing new format to file: {0} ", newFileName);
+            //Console.WriteLine("Writing new format to file: {0} ", newFileName);
             
             // try to load file with new format for same yyyyMM - if it does not exist, then create a new file
             bool newFileExists = System.IO.File.Exists(newFileName);
@@ -472,6 +472,7 @@ namespace LoxStatEdit {
             else
                 diffNextMonth = selectedZone.BaseUtcOffset.TotalSeconds;
 
+            /*
             Console.WriteLine("This month - Time in {0} zone: {1}", selectedZone.IsDaylightSavingTime(newTimeStamp) ?
                        selectedZone.DaylightName : selectedZone.StandardName, newTimeStamp);
             Console.WriteLine("             UTC Time: {0}", TimeZoneInfo.ConvertTimeToUtc(newTimeStamp, selectedZone));
@@ -481,6 +482,7 @@ namespace LoxStatEdit {
 
             Console.WriteLine("Diff to UTC (in min) this month: " + diffThisMonth / 60 );
             Console.WriteLine("Diff to UTC (in min) next month: " + diffNextMonth / 60);
+            */
 
             uint timeStampOffsetPrev = 0;
             bool endOfDST = false;
@@ -488,7 +490,6 @@ namespace LoxStatEdit {
             if (_loxStatFile.DataPoints != null)
                 for (var index = 0; index < _loxStatFile.DataPoints.Count; index++) {
                     LoxStatDataPoint dP = _loxStatFile.DataPoints[index];
-
 
                     // if time goes 'backwards' then assume end of daylight savings time for rest of month
                     if (dP.TimestampOffset < timeStampOffsetPrev)
@@ -670,7 +671,7 @@ namespace LoxStatEdit {
 
             ////// write to new file
             _newLoxStatFile.Save();
-            Console.WriteLine("File written!");
+            //Console.WriteLine("File written!");
             return 0;
         }
 
@@ -699,17 +700,19 @@ namespace LoxStatEdit {
             int valueIndex = value2RadioButton.Checked ? 1 : 0;
 
             // write power / flow data to _1 file, first data column
+            // skip if last option was choosen
             if (powerIntervalComboBox.SelectedIndex < 6)
                 errorCode = WriteNewFile(1, fileItem, allowOverwrite, loxFunctionBlock, powerIntervalComboBox.SelectedIndex, 0);
-            Console.WriteLine("Error code for _1 : {0} ", errorCode);
+            //Console.WriteLine("Error code for _1 : {0} ", errorCode);
 
             // write meter reading data to _2 file
-
             // if the new meter only has one column (consumption), column is automatically adjusted from feed to consumption
             if (valueIndex + 1 > loxFunctionBlock.FileItem[2].ValueCount)
                 valueIndex = 0;
-            errorCode = WriteNewFile(2, fileItem, allowOverwrite, loxFunctionBlock, meterIntervalComboBox.SelectedIndex, valueIndex);
-            Console.WriteLine("Error code for _2 : {0} ", errorCode);
+            // skip if last option was choosen
+            if (powerIntervalComboBox.SelectedIndex < 6)
+                errorCode += WriteNewFile(2, fileItem, allowOverwrite, loxFunctionBlock, meterIntervalComboBox.SelectedIndex, valueIndex);
+            //Console.WriteLine("Error code for _2 : {0} ", errorCode);
 
             return errorCode;
         }
