@@ -24,6 +24,7 @@ namespace LoxStatEdit
             private string _name;
             private string _description;
             private ushort _valueCount;
+            private bool _isValidStatsContent;
 
             public string FileName {
                 get {
@@ -92,21 +93,29 @@ namespace LoxStatEdit
                     if (_name == null) {
                         try {
                             if (FileInfo != null) {
-                                _name = LoxStatFile.Load(FileInfo.FullName, true).Text;
+                                LoxStatFile loxStatFile = LoxStatFile.Load(FileInfo.FullName, true);
+                                if (loxStatFile.IsValidStatsContent) {
 
-                                // Append the file extension as a suffix could be _1.202407 or 202407
-                                // This is a workaround until the sorting on two levels is implemented
-                                // e.g. sort by description and then by filename, else the files are not in historical order
-                                _name += " [";
+                                    _name = loxStatFile.Text;
 
-                                // check if filename contains _
-                                if (FileInfo.Name.Contains('_')) {
-                                    _name += FileInfo.Name.Substring(FileInfo.Name.IndexOf('_') + 1);
+                                    // Append the file extension as a suffix could be _1.202407 or 202407
+                                    // This is a workaround until the sorting on two levels is implemented
+                                    // e.g. sort by description and then by filename, else the files are not in historical order
+                                    _name += " [";
+
+                                    // check if filename contains _
+                                    if (FileInfo.Name.Contains('_')) {
+                                        _name += FileInfo.Name.Substring(FileInfo.Name.IndexOf('_') + 1);
+                                    } else {
+                                        _name += FileInfo.Name.Substring(FileInfo.Name.Length - 6);
+                                    }
+
+                                    _name += "]";
+                                    _isValidStatsContent = true;
                                 } else {
-                                    _name += FileInfo.Name.Substring(FileInfo.Name.Length - 6);
+                                    _name = "No valid statistics file";
+                                    _isValidStatsContent = false;
                                 }
-
-                                _name += "]";
                             }
                         }
                         catch (Exception) {
@@ -124,7 +133,15 @@ namespace LoxStatEdit
                     if (_description == null) {
                         try {
                             if (FileInfo != null) {
-                                _description = LoxStatFile.Load(FileInfo.FullName, true).Text;
+                                LoxStatFile loxStatFile = LoxStatFile.Load(FileInfo.FullName, true);
+                                if (loxStatFile.IsValidStatsContent) {
+
+                                    _description = loxStatFile.Text;
+                                    _isValidStatsContent = true;
+                                } else {
+                                    _description = "No valid statistics file";
+                                    _isValidStatsContent = false;
+                                }
                             }
                         }
                         catch (Exception) {
@@ -143,14 +160,22 @@ namespace LoxStatEdit
                     if (_valueCount == 0) {
                         try {
                             if (FileInfo != null) {
-                                _valueCount = LoxStatFile.Load(FileInfo.FullName, true).ValueCount;
+                                LoxStatFile loxStatFile = LoxStatFile.Load(FileInfo.FullName, true);
+                                if (loxStatFile.IsValidStatsContent) {
+
+                                    _valueCount = loxStatFile.ValueCount;
+                                    _isValidStatsContent = true;
+                                } else {
+                                    _valueCount = 0;
+                                    _isValidStatsContent = false;
+                                }
                             }
                         }
                         catch (Exception) {
                             _valueCount = 0;
                         }
                         if (_valueCount == 0)
-                            // No file on local FS, so guess the number of column
+                            // No file on local FS, so guess the number of columns
                             _valueCount = 1;
                     }
                     return _valueCount;
@@ -173,6 +198,12 @@ namespace LoxStatEdit
             public long Size {
                 get {
                     return (FileInfo != null) ? FileInfo.Length : MsFileInfo.Size;
+                }
+            }
+
+            public bool IsValidStatsContent {
+                get {
+                    return _isValidStatsContent;
                 }
             }
 
@@ -894,7 +925,7 @@ namespace LoxStatEdit
                     //e.ToolTipText = null;
                     return;
                 }
-
+                
                 var fileItem = _fileItems[e.RowIndex];
                 switch (e.ColumnIndex) {
                     case 0: // fileItem.FileName; 
@@ -936,6 +967,7 @@ namespace LoxStatEdit
             if (e.RowIndex < 0)
                 return; //When clicking the header row
             var fileItem = _fileItems[e.RowIndex];
+
             switch (e.ColumnIndex) {
                 case 6: //Download
                     progressBar.Maximum = 1;
@@ -960,7 +992,12 @@ namespace LoxStatEdit
                             "Please download it first.", "Error - File not downloaded", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         break;
                     }
-
+                    //
+                    if (!fileItem.IsValidStatsContent) {
+                        MessageBox.Show($"The file \"{fileItem.FileName}\" is not a valid Loxone statistics file and " +
+                           "can't be edited.", "Error - File has no valid content", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        break;
+                    }
                     //Console.WriteLine(fileItem.FileInfo.FullName);
                     using (LoxStatFileForm form = new LoxStatFileForm(this, _fileItems, fileItem.FileInfo.FullName)) {
                         // Calculate the new location
@@ -981,6 +1018,12 @@ namespace LoxStatEdit
                     if (fileItem.FileInfo == null) {
                         MessageBox.Show($"The file \"{fileItem.FileName}\" cannot be uploaded, since it's not available on the local filesystem.\n\n" +
                             "Please download it first.", "Error - File not downloaded", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        break;
+                    }
+                    if ((!fileItem.IsValidMsStatsFile) || (!fileItem.IsValidStatsContent)) {
+                        MessageBox.Show($"The file \"{fileItem.FileName}\" is not a valid Loxone statistics file and " +
+                           "can't be uploaded.\n\n" +
+                           "Either the file name or the content are invalid.", "Error - File not valid", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         break;
                     }
 
@@ -1012,6 +1055,13 @@ namespace LoxStatEdit
                             "Please download it first.", "Error - File not downloaded", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         break;
                     }
+                    if ((!fileItem.IsValidMsStatsFile) || (!fileItem.IsValidStatsContent)) {
+                        MessageBox.Show($"The file \"{fileItem.FileName}\" is not a valid Loxone statistics file and " +
+                           "can't be converted.\n\n" +
+                           "Either the file name or the content are invalid.", "Error - File not valid", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        break;
+                    }
+
                     //Console.WriteLine(fileItem.FileInfo.FullName);
                     // Show dialog for conversion settings
                     using (var form = new LoxStatConvertForm(GetFilteredLocalFileItems(), fileItem)) {
@@ -1125,11 +1175,11 @@ namespace LoxStatEdit
 
         // Launch project link
         private void githubLinkLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e) {
-            System.Diagnostics.Process.Start("https://github.com/mr-manuel/Loxone_LoxStatEdit");
+            System.Diagnostics.Process.Start("https://github.com/Jan21493/Loxone_LoxStatEdit/releases");
         }
 
         private void donateLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e) {
-            System.Diagnostics.Process.Start("https://github.md0.eu/links/loxstatsedit-donate");
+            System.Diagnostics.Process.Start("https://www.loxforum.com/Spende");
         }
 
         #endregion

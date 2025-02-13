@@ -40,8 +40,8 @@
             System.Windows.Forms.Label changeIntervalTolabel;
             System.Windows.Forms.Label newDescriptionLabel;
             System.Windows.Forms.Label infoLabel;
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(LoxStatConvertForm));
             System.Windows.Forms.Label timeZonelabel;
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(LoxStatConvertForm));
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.descriptionTextBox = new System.Windows.Forms.TextBox();
             this.fileNameTextBox = new System.Windows.Forms.TextBox();
@@ -53,6 +53,8 @@
             this.meterIntervalComboBox = new System.Windows.Forms.ComboBox();
             this.powerIntervalComboBox = new System.Windows.Forms.ComboBox();
             this.convertOldGroupBox = new System.Windows.Forms.GroupBox();
+            this.useDSTcheckBox = new System.Windows.Forms.CheckBox();
+            this.timeZoneComboBox = new System.Windows.Forms.ComboBox();
             this.value2RadioButton = new System.Windows.Forms.RadioButton();
             this.value1RadioButton = new System.Windows.Forms.RadioButton();
             this.overwriteCheckBox = new System.Windows.Forms.CheckBox();
@@ -63,8 +65,6 @@
             this.newDescriptionTextBox = new System.Windows.Forms.TextBox();
             this.modifyNameGroupBox = new System.Windows.Forms.GroupBox();
             this.fileInfoTextBox = new System.Windows.Forms.TextBox();
-            this.timeZoneComboBox = new System.Windows.Forms.ComboBox();
-            this.useDSTcheckBox = new System.Windows.Forms.CheckBox();
             fileInfoLabel = new System.Windows.Forms.Label();
             CancelButton = new System.Windows.Forms.Button();
             fileNameLabel = new System.Windows.Forms.Label();
@@ -189,6 +189,18 @@
             infoLabel.Text = "Info";
             infoLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
+            // timeZonelabel
+            // 
+            timeZonelabel.Location = new System.Drawing.Point(11, 176);
+            timeZonelabel.Name = "timeZonelabel";
+            timeZonelabel.Size = new System.Drawing.Size(483, 21);
+            timeZonelabel.TabIndex = 20;
+            timeZonelabel.Text = "Select the local time zone where the MS is located: (see tootip for details)";
+            timeZonelabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.toolTip.SetToolTip(timeZonelabel, "All time stamps can be converted from a local time zone to UTC. If you don\'t want" +
+        " to convert any time stamps,\r\nselect \'Do not convert any time stamps\' from the d" +
+        "rop down list.");
+            // 
             // descriptionTextBox
             // 
             this.descriptionTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
@@ -265,7 +277,8 @@
             "Interval 10 minutes.",
             "Interval 15 minutes.",
             "Interval 30 minutes.",
-            "Interval 60 minutes."});
+            "Interval 60 minutes.",
+            "Do NOT write any data for meter reading to the new meter."});
             this.meterIntervalComboBox.Location = new System.Drawing.Point(237, 73);
             this.meterIntervalComboBox.Name = "meterIntervalComboBox";
             this.meterIntervalComboBox.Size = new System.Drawing.Size(419, 21);
@@ -309,6 +322,29 @@
             this.convertOldGroupBox.Size = new System.Drawing.Size(667, 257);
             this.convertOldGroupBox.TabIndex = 9;
             this.convertOldGroupBox.TabStop = false;
+            // 
+            // useDSTcheckBox
+            // 
+            this.useDSTcheckBox.AutoSize = true;
+            this.useDSTcheckBox.Location = new System.Drawing.Point(25, 229);
+            this.useDSTcheckBox.Name = "useDSTcheckBox";
+            this.useDSTcheckBox.Size = new System.Drawing.Size(256, 17);
+            this.useDSTcheckBox.TabIndex = 22;
+            this.useDSTcheckBox.Text = "Use daylight saving time with selected time zone.";
+            this.useDSTcheckBox.UseVisualStyleBackColor = true;
+            // 
+            // timeZoneComboBox
+            // 
+            this.timeZoneComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.timeZoneComboBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
+            this.timeZoneComboBox.FormattingEnabled = true;
+            this.timeZoneComboBox.Items.AddRange(new object[] {
+            "List of UUIDs"});
+            this.timeZoneComboBox.Location = new System.Drawing.Point(14, 201);
+            this.timeZoneComboBox.Name = "timeZoneComboBox";
+            this.timeZoneComboBox.Size = new System.Drawing.Size(642, 21);
+            this.timeZoneComboBox.TabIndex = 21;
+            this.timeZoneComboBox.SelectionChangeCommitted += new System.EventHandler(this.timeZoneComboBox_SelectionChangeCommitted);
             // 
             // value2RadioButton
             // 
@@ -425,41 +461,6 @@
             this.fileInfoTextBox.Size = new System.Drawing.Size(280, 20);
             this.fileInfoTextBox.TabIndex = 27;
             this.fileInfoTextBox.Text = "info to file";
-            // 
-            // timeZoneComboBox
-            // 
-            this.timeZoneComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.timeZoneComboBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
-            this.timeZoneComboBox.FormattingEnabled = true;
-            this.timeZoneComboBox.Items.AddRange(new object[] {
-            "List of UUIDs"});
-            this.timeZoneComboBox.Location = new System.Drawing.Point(14, 201);
-            this.timeZoneComboBox.Name = "timeZoneComboBox";
-            this.timeZoneComboBox.Size = new System.Drawing.Size(642, 21);
-            this.timeZoneComboBox.TabIndex = 21;
-            this.timeZoneComboBox.SelectionChangeCommitted += new System.EventHandler(this.timeZoneComboBox_SelectionChangeCommitted);
-            // 
-            // timeZonelabel
-            // 
-            timeZonelabel.Location = new System.Drawing.Point(11, 176);
-            timeZonelabel.Name = "timeZonelabel";
-            timeZonelabel.Size = new System.Drawing.Size(483, 21);
-            timeZonelabel.TabIndex = 20;
-            timeZonelabel.Text = "Select the local time zone where the MS is located: (see tootip for details)";
-            timeZonelabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.toolTip.SetToolTip(timeZonelabel, "All time stamps can be converted from a local time zone to UTC. If you don\'t want" +
-        " to convert any time stamps,\r\nselect \'Do not convert any time stamps\' from the d" +
-        "rop down list.");
-            // 
-            // useDSTcheckBox
-            // 
-            this.useDSTcheckBox.AutoSize = true;
-            this.useDSTcheckBox.Location = new System.Drawing.Point(25, 229);
-            this.useDSTcheckBox.Name = "useDSTcheckBox";
-            this.useDSTcheckBox.Size = new System.Drawing.Size(256, 17);
-            this.useDSTcheckBox.TabIndex = 22;
-            this.useDSTcheckBox.Text = "Use daylight saving time with selected time zone.";
-            this.useDSTcheckBox.UseVisualStyleBackColor = true;
             // 
             // LoxStatConvertForm
             // 

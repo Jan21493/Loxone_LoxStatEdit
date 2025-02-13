@@ -153,11 +153,11 @@
   <metadata name="infoLabel.GenerateMember" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>False</value>
   </metadata>
+  <metadata name="timeZonelabel.GenerateMember" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+    <value>False</value>
+  </metadata>
   <metadata name="openFileDialog.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>17, 17</value>
-  </metadata>
-  <metadata name="toolTip.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>193, 22</value>
   </metadata>
   <data name="convertOldRadioButton.ToolTip" xml:space="preserve">
     <value>This function converts statistics data from a meter with old statistics style (e.g. a utility meter function block) to an
@@ -169,19 +169,22 @@ NOTE: This function is only implemented for simple (unidirectional) and bidirect
 2. Then you convert the statistics data for previous months / years from the old to the new one by selecting its UUID. 
 
 Optional: You may decrease the interval, e.g. from 10 minutes to 1 hour (recommended) to reduce the amount of data.
-If the interval is higher than before, the missing values are calculated. The some of the new meters (e.g. bidirectional meters)
+If the interval is higher than before, the missing values are calculated. Most of the new meters (e.g. bidirectional meters)
 support separate intervals for consumption/flow and meter readings.
 
-Data for power/flow is only used to display a single day in the app. It it not used for any summaries. It's not used for any 
-calculations. Therefore you should consider if a more detailed power/flow view (a smaller interval) is desired or
-a more general view with less values (a larger interval) is sufficient. The interval should be as large as possible that fit the needs.
+Data for power/flow is only used to display a single day in the Loxone app. It is neither used for any summaries, nor for any 
+calculations. You should therefore prefer a more general view with fewer values ​​(a larger interval) over a more detailed 
+performance/flow view (a smaller interval).The interval should be as large as possible that fit the needs (one hour is better than 5 minutes).
 You may also choose not to create any power/flow data for the new statistics file. 
 
 This is how the function works:
-- Values are transferred from this file (old style, without '_#' in file name) to a function block with new style (with '_#' in file name).
+- Values are transferred from THIS file (old style, without '_#' in file name) to a function block with new style (with '_#' in file name).
 - It is assumed that 'value' contains the meter readings and 'value 2' (optional) the power / flow data in the old statistics file.
+
 - Data from column 'value' (meter reading) from this file is transferred to new UUID to _2 file into 'value' (consumption) or 'value 2' (feed). 
 - The column can be selected. If the new meter has two columns for data, two columns will be created, otherwise only one.
+- If you don't want to create any values for meter reading, choose 'Do NOT write any data for meter reading to the new meter.'.
+
 - Data from column 'value 2' (power / flow data, if existing) from this file is transferred to new UUID to _1 file into 'value'.
 - If there is no power / flow data, then zeros are written unless option 'Do NOT write any data for power/flow to the new meter.' is choosen.
 
@@ -210,9 +213,6 @@ info name for an UUID.</value>
   </data>
   <metadata name="helpProvider1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>382, 19</value>
-  </metadata>
-  <metadata name="timeZonelabel.GenerateMember" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
-    <value>False</value>
   </metadata>
   <data name="disclaimerTextBox.Text" xml:space="preserve">
     <value>### DISCLAIMER! USE AT YOUR OWN RISK! ###

@@ -40,6 +40,12 @@ namespace LoxStatEdit
         /// </summary>
         public Exception LoadException { get; private set; }
 
+        /// <summary>is this a valid statistics file?
+        /// </summary>
+        public bool IsValidStatsContent {
+            get; set;
+        }
+
         public Guid Guid
         {
             get {
@@ -163,23 +169,41 @@ namespace LoxStatEdit
                 using (var reader = new BinaryReader(File.Open(fileName, FileMode.Open)))
                 {
                     loxStatFile.ValueCount = reader.ReadUInt16();
+                    
                     loxStatFile.Unknown0x02 = reader.ReadUInt16();
                     loxStatFile.Unknown0x04 = reader.ReadUInt32();
                     loxStatFile.TextLength = reader.ReadInt32();
-                    loxStatFile.TextBytes = reader.ReadBytes(loxStatFile.TextLength);
-                    loxStatFile.TextTerminator = reader.ReadByte();
-                    loxStatFile.Padding = reader.ReadBytes(
-                    loxStatFile.GetPaddingLength(13 + loxStatFile.TextLength));
 
                     List<LoxStatDataPoint> dataPoints = new List<LoxStatDataPoint>();
                     loxStatFile.DataPoints = dataPoints;
-                    if (!headerOnly)
-                        LoxStatDataPoint.FromBinaryReader(loxStatFile, reader);
+
+                    loxStatFile.IsValidStatsContent = true;
+
+                    // verify if file is corrupt or not a statistics file
+                    if ((loxStatFile.ValueCount < 10) &&
+                        (loxStatFile.TextLength >= 0) &&
+                        (loxStatFile.TextLength < 1000)) {
+
+                        loxStatFile.TextBytes = reader.ReadBytes(loxStatFile.TextLength);
+                        loxStatFile.TextTerminator = reader.ReadByte();
+                        loxStatFile.Padding = reader.ReadBytes(
+                        loxStatFile.GetPaddingLength(13 + loxStatFile.TextLength));
+
+                        if (!headerOnly)
+                            LoxStatDataPoint.FromBinaryReader(loxStatFile, reader);
+                    } else {
+                        // set some default to avoid further exceptions
+                        loxStatFile.TextLength = 0;
+                        loxStatFile.TextBytes = new byte[] {0};
+                        loxStatFile.ValueCount = 0;
+                        loxStatFile.IsValidStatsContent = false;
+                    }
                 }
             }
             catch (Exception ex)
             {
                 loxStatFile.LoadException = ex;
+                loxStatFile.IsValidStatsContent = false;
             }
             return loxStatFile;
         }
