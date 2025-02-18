@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Reflection;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -423,34 +424,10 @@ namespace LoxStatEdit
                     },
                 });
                 _dataGridView.Columns.Add(new DataGridViewButtonColumn {
-                    DataPropertyName = "Download",
-                    HeaderText = "Download",
-                    Width = 60,
-                    ToolTipText = "Copy a file from Loxone MS to local file system."
-                });
-                _dataGridView.Columns.Add(new DataGridViewButtonColumn {
                     DataPropertyName = "Edit",
                     HeaderText = "Edit",
                     Width = 50,
                     ToolTipText = "Edit statistical data (entries) in the file on the local file system (FS)."
-                });
-                _dataGridView.Columns.Add(new DataGridViewButtonColumn {
-                    DataPropertyName = "Upload",
-                    HeaderText = "Upload",
-                    Width = 60,
-                    ToolTipText = "Copy a file from local file system (FS) to Loxone MS."
-                });
-                _dataGridView.Columns.Add(new DataGridViewButtonColumn {
-                    DataPropertyName = "Convert",
-                    HeaderText = "Convert",
-                    Width = 60,
-                    ToolTipText = "Convert data from old meter function block to new style."
-                });
-                _dataGridView.Columns.Add(new DataGridViewButtonColumn {
-                    DataPropertyName = "Delete",
-                    HeaderText = "Delete",
-                    Width = 60,
-                    ToolTipText = "Delete a file on both, the Loxone MS and the local file system, after confirmation."
                 });
 
                 // Bind the SortableBindingList to the DataGridView
@@ -710,6 +687,79 @@ namespace LoxStatEdit
                 return false;
             }
         }
+
+        private static void ExportText(FileStream fs, string value) {
+            byte[] info = new UTF8Encoding(true).GetBytes(value);
+            fs.Write(info, 0, info.Length);
+        }
+        private bool Export(FileItem fileItem, string exportPath) {
+
+            LoxStatFile loxStatFile = null;
+
+            // show error message, if file is not downloaded yet
+            if ((!fileItem.IsValidMsStatsFile) || (!fileItem.IsValidStatsContent)) {
+                MessageBox.Show($"The file \"{fileItem.FileName}\" is not a valid Loxone statistics file and " +
+                   "can't be exported.\n\n" +
+                   "Either the file name or the content are invalid.", "Error - File not valid", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+           
+            try {
+
+                // Export file from local file system
+                string fileNameWithPath = Path.Combine(_folderTextBox.Text, fileItem.FileName);
+                if (File.Exists(fileNameWithPath)) {
+                    loxStatFile = LoxStatFile.Load(fileItem.FileInfo.FullName);
+                }
+            }
+            catch (Exception ex) {
+                MessageBox.Show($"# Message\n{ex.Message}\n\n# Data\n{ex.Data}\n\n# StackTrace\n{ex.StackTrace}",
+                    "Error - local file system", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+                return false;
+            }
+            if (loxStatFile == null)
+                return false;
+
+            exportPath += "\\" + fileItem.FileName + ".txt";
+
+            // Delete the file if it exists.
+            if (File.Exists(exportPath)) {
+                File.Delete(exportPath + ".bak");
+                File.Move(exportPath, exportPath + ".bak");
+                
+            }
+            int dataPointsCount = 0;
+            if (loxStatFile.DataPoints != null)
+                dataPointsCount = loxStatFile.DataPoints.Count;
+            //Create the file.
+            using (FileStream fs = File.Create(exportPath)) {
+                ExportText(fs, ";Info;Loxone Statistics file - exported from LoxStatEdit\r\n");
+                ExportText(fs, ";FileName;" + fileItem.FileInfo.FullName + "\r\n");
+                ExportText(fs, ";GUID;" + loxStatFile.Guid.ToString("D") + "\r\n");
+                ExportText(fs, ";ValueCount;" + loxStatFile.ValueCount + "\r\n");
+                ExportText(fs, ";Unknown0x02;" + loxStatFile.Unknown0x02.ToString("X4") + "\r\n");
+                ExportText(fs, ";Unknown0x04;" + loxStatFile.Unknown0x04.ToString("X8") + "\r\n");
+                ExportText(fs, ";TextLength;" + loxStatFile.TextLength + "\r\n");
+                ExportText(fs, ";TextBytes;" + loxStatFile.Text + "\r\n");
+                if (loxStatFile.msStatsType > 0)
+                    ExportText(fs, ";TimeFormat;UTC\r\n");
+                else
+                    ExportText(fs, ";TimeFormat;Local\r\n");
+                ExportText(fs, "DataPoints;" + dataPointsCount + "\r\n");
+
+                for (var index = 0; index < dataPointsCount; index++) {
+                    LoxStatDataPoint dP = loxStatFile.DataPoints[index];
+
+                    ExportText(fs, index +";" + dP.Timestamp);
+                    for (var j = 0; j < loxStatFile.ValueCount; j++)
+                        ExportText(fs, ";" + dP.Values[j]);
+                    ExportText(fs, "\r\n");
+                }
+            }
+            return true;
+        } // end of export function
+
         #endregion
 
         #region Events
@@ -892,19 +942,7 @@ namespace LoxStatEdit
                         e.Value = fileItem.StatusString;
                         break;
                     case 6:
-                        e.Value = "Download";
-                        break;
-                    case 7:
                         e.Value = "Edit";
-                        break;
-                    case 8:
-                        e.Value = "Upload";
-                        break;
-                    case 9:
-                        e.Value = "Convert";
-                        break;
-                    case 10:
-                        e.Value = "Delete";
                         break;
                     default:
                         e.Value = null;
@@ -969,23 +1007,7 @@ namespace LoxStatEdit
             var fileItem = _fileItems[e.RowIndex];
 
             switch (e.ColumnIndex) {
-                case 6: //Download
-                    progressBar.Maximum = 1;
-                    progressBar.Value = 0;
-                    progressBar.SetState(1);
-                    progressLabel.Text = "Starting download...";
-                    if (Download(fileItem)) {
-                        progressBar.Value = 1;
-                        progressLabel.Text = "Download complete!";
-                        RefreshLocal();
-                        RefreshGridView();
-                    } else {
-                        progressBar.Value = 1;
-                        progressBar.SetState(2);
-                        progressLabel.Text = "Download failed!";
-                    }
-                    break;
-                case 7: //Edit
+                case 6: //Edit
                     // show error message, if file is not downloaded yet
                     if (fileItem.FileInfo == null) {
                         MessageBox.Show($"The file \"{fileItem.FileName}\" cannot be edited, since it's not available on the filesystem.\n\n" +
@@ -1012,106 +1034,6 @@ namespace LoxStatEdit
                     }
                     RefreshLocal();
                     RefreshGridView();
-                    break;
-                case 8: //Upload
-                    // show error message, if there is no file to upload
-                    if (fileItem.FileInfo == null) {
-                        MessageBox.Show($"The file \"{fileItem.FileName}\" cannot be uploaded, since it's not available on the local filesystem.\n\n" +
-                            "Please download it first.", "Error - File not downloaded", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        break;
-                    }
-                    if ((!fileItem.IsValidMsStatsFile) || (!fileItem.IsValidStatsContent)) {
-                        MessageBox.Show($"The file \"{fileItem.FileName}\" is not a valid Loxone statistics file and " +
-                           "can't be uploaded.\n\n" +
-                           "Either the file name or the content are invalid.", "Error - File not valid", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        break;
-                    }
-
-                    progressBar.Maximum = 1;
-                    progressBar.Value = 0;
-                    progressBar.SetState(1);
-                    progressLabel.Text = "Starting upload...";
-                    if (Upload(fileItem)) {
-                        progressBar.Value = 1;
-                        progressLabel.Text = "Upload complete!";
-                        RefreshMs();
-                        RefreshGridView();
-                    } else {
-                        progressBar.Value = 1;
-                        progressBar.SetState(2);
-                        progressLabel.Text = "Upload failed!";
-                    }
-                    break;
-                case 9: //Convert
-
-                    progressBar.Maximum = 1;
-                    progressBar.Value = 0;
-                    progressBar.SetState(1);
-                    progressLabel.Text = "Starting converting...";
-
-                    // show error message, if file is not downloaded yet
-                    if (fileItem.FileInfo == null) {
-                        MessageBox.Show($"The file \"{fileItem.FileName}\" cannot be converted, since it's not available on the local filesystem.\n\n" +
-                            "Please download it first.", "Error - File not downloaded", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        break;
-                    }
-                    if ((!fileItem.IsValidMsStatsFile) || (!fileItem.IsValidStatsContent)) {
-                        MessageBox.Show($"The file \"{fileItem.FileName}\" is not a valid Loxone statistics file and " +
-                           "can't be converted.\n\n" +
-                           "Either the file name or the content are invalid.", "Error - File not valid", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        break;
-                    }
-
-                    //Console.WriteLine(fileItem.FileInfo.FullName);
-                    // Show dialog for conversion settings
-                    using (var form = new LoxStatConvertForm(GetFilteredLocalFileItems(), fileItem)) {
-                        // Calculate the new location
-                        int offsetX = 100; // Horizontal offset from the parent form
-                        int offsetY = 50; // Vertical offset from the parent form
-                        form.StartPosition = FormStartPosition.Manual; // Allows manual positioning
-                        form.Location = new System.Drawing.Point(this.Location.X + offsetX, this.Location.Y + offsetY);
-
-                        // Show the form as a dialog
-                        form.ShowDialog(this);
-                    }
-                    RefreshLocal();
-                    RefreshGridView();
-                    /*
-                    // ToDo: move code for conversion to convert function
-                    if (Convert(fileItem)) {
-                        progressBar.Value = 1;
-                        progressLabel.Text = "Converting complete!";
-                        RefreshMs();
-                        RefreshLocal();
-                        RefreshGridView();
-                    } else {
-                        progressBar.Value = 1;
-                        progressBar.SetState(2);
-                        progressLabel.Text = "Converting failed!";
-                    }*/
-                    break;
-                case 10: //Delete
-                    // show error message, if there is no file to upload
-                    if ((fileItem.FileInfo != null) || (fileItem.MsFileInfo != null)) {
-                        result = MessageBox.Show($"Do you really want to delete the file:\n{fileItem.FileName}\n\nfrom the Loxone MS and local file system?", "Question - Delete Stats File from MS and FS?", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-                        if (result == DialogResult.Yes) {
-                            progressBar.Maximum = 1;
-                            progressBar.Value = 0;
-                            progressBar.SetState(1);
-                            progressLabel.Text = "Starting delete...";
-                            if (Delete(fileItem)) {
-                                progressBar.Value = 1;
-                                progressLabel.Text = "Deleting complete!";
-                                RefreshMs();
-                                RefreshLocal();
-                                RefreshGridView();
-                            } else {
-                                progressBar.Value = 1;
-                                progressBar.SetState(2);
-                                progressLabel.Text = "Deleting failed!";
-                            }
-                        }
-                    }
                     break;
             }
         }
@@ -1143,6 +1065,7 @@ namespace LoxStatEdit
         }
 
         private async void UploadButton_Click(object sender, EventArgs e) {
+
             progressBar.Maximum = _dataGridView.SelectedRows.Count;
             progressBar.Value = 0;
             progressBar.SetState(1);
@@ -1150,27 +1073,36 @@ namespace LoxStatEdit
 
             foreach (DataGridViewRow row in _dataGridView.SelectedRows) {
                 int rowIndex = row.Index; // Capture the index for the closure
-
+                bool result = true;
                 // show error message, if there is no file to upload
                 if (_fileItems[rowIndex].FileInfo == null) {
-                    progressBar.Value = progressBar.Maximum;
-                    progressLabel.Text = "Upload failed!";
                     MessageBox.Show($"The file \"{_fileItems[rowIndex].FileName}\" cannot be uploaded, since it's not available on the filesystem.\n\nPlease download it first.", "Error - File not downloaded", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
+                    result = false;
+                } else if ((!_fileItems[rowIndex].IsValidMsStatsFile) || (!_fileItems[rowIndex].IsValidStatsContent)) {
+                    MessageBox.Show($"The file \"{_fileItems[rowIndex].FileName}\" is not a valid Loxone statistics file and " +
+                       "can't be uploaded.\n\n" +
+                       "Either the file name or the content are invalid.", "Error - File not valid", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    result = false;
                 }
-
-                bool result = await Task.Run(() => Upload(_fileItems[rowIndex]));
+                if (result)
+                    result = await Task.Run(() => Upload(_fileItems[rowIndex]));
                 if (!result) {
                     progressBar.Value = progressBar.Maximum;
                     progressBar.SetState(2);
-                    progressLabel.Text = "Download failed!";
+                    progressLabel.Text = "Upload failed!";
+                    RefreshMs();
+                    RefreshLocal();
+                    RefreshGridView();
                     return;
                 }
 
                 progressBar.Value++;
-                progressLabel.Text = $"Uploaded {progressBar.Value} of {progressBar.Maximum}";
+                progressLabel.Text = $"Uploaded {progressBar.Value} of {progressBar.Maximum} files";
             }
             progressLabel.Text = "Upload complete!";
+            RefreshMs();
+            RefreshLocal();
+            RefreshGridView();
         }
 
         // Launch project link
@@ -1190,7 +1122,11 @@ namespace LoxStatEdit
 
         private void ConvertButton_Click(object sender, EventArgs e) {
 
-            Console.WriteLine("Start of ConvertButton_Click");
+            progressBar.Maximum = _dataGridView.SelectedRows.Count;
+            progressBar.Value = 0;
+            progressBar.SetState(1);
+            progressLabel.Text = "Starting conversion...";
+
             // build a list of file names and file items for selected rows
             IList<FileItem> selectedFileItems = new List<FileItem>();
             IList<string> selectedFileNames = new List<string>();
@@ -1223,7 +1159,6 @@ namespace LoxStatEdit
             }
 
             // Show dialog to convert all selected files
-      
             using (var form = new LoxStatConvertForm(GetFilteredLocalFileItems(), selectedFileItems.ToArray())) {
                 // Calculate the new location
                 int offsetX = 100; // Horizontal offset from the parent form
@@ -1234,9 +1169,10 @@ namespace LoxStatEdit
                 // Show the form as a dialog
                 form.ShowDialog(this);
             }
+            progressBar.Value = progressBar.Maximum;
+            progressLabel.Text = "Conversion completed!";
             RefreshLocal();
             RefreshGridView();
-            Console.WriteLine("End of ConvertButton_Click");
 
         } // end of ConvertButton_Click
 
@@ -1252,6 +1188,11 @@ namespace LoxStatEdit
                 selectedFileNames.Add(_fileItems[rowIndex].FileName);
             }
 
+            progressBar.Maximum = selectedFileItems.Count;
+            progressBar.Value = 0;
+            progressBar.SetState(1);
+            progressLabel.Text = "Starting deletion...";
+
             // Delete all selected files after dialog to confirm
             if ((selectedFileItems.Count > 0)) {
                 DialogResult result = MessageBox.Show($"Do you really want to delete the following file(s):\n {string.Join("\n ", selectedFileNames)}\n\nfrom the Loxone MS AND local file system?\n\n" +
@@ -1259,10 +1200,6 @@ namespace LoxStatEdit
                     , "Question - Delete Stats File(s) from MS and FS?", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
                 if (result == DialogResult.Yes) {
                     int failedCounter = 0;
-                    progressBar.Maximum = selectedFileItems.Count;
-                    progressBar.Value = 0;
-                    progressBar.SetState(1);
-                    progressLabel.Text = "Starting delete...";
                     foreach (FileItem fileItem in selectedFileItems) {
                         progressBar.Value += 1;
                         progressLabel.Text = $"Deleting {fileItem.FileName} ...";
@@ -1271,9 +1208,9 @@ namespace LoxStatEdit
                     }
                     if (failedCounter > 0) {
                         progressBar.SetState(2);
-                        progressLabel.Text = $"Deleting complete. {failedCounter} has/have failed!";
+                        progressLabel.Text = $"Deletion completed. {failedCounter} files has/have failed!";
                     } else {
-                        progressLabel.Text = "Deleting complete!";
+                        progressLabel.Text = "Deletion completed!";
                     }
 
                     RefreshMs();
@@ -1282,5 +1219,56 @@ namespace LoxStatEdit
                 }
             }
         } // end of DeleteButton_Click
+
+        private void ExportButton_Click(object sender, EventArgs e) {
+
+            // build a list of file names and file items for selected rows
+            IList<FileItem> selectedFileItems = new List<FileItem>();
+            IList<string> selectedFileNames = new List<string>();
+
+            foreach (DataGridViewRow row in _dataGridView.SelectedRows) {
+                int rowIndex = row.Index; // Capture the index for the closure
+                selectedFileItems.Add(_fileItems[rowIndex]);
+                selectedFileNames.Add(_fileItems[rowIndex].FileName);
+
+                // file must be available on local FS
+                if (_fileItems[rowIndex].FileInfo == null) {
+                    MessageBox.Show($"All files must be available on the local filesystem to be exported,\n" +
+                        $"but (at least) file \"{_fileItems[rowIndex].FileName}\" is missing. Please download it (and all other files) first.",
+                        "Error - Export cancelled", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+            }
+            if ((selectedFileItems == null) || (selectedFileItems.Count == 0)) {
+                MessageBox.Show($"Export cancelled, because no files were selected.",
+                    "Error - No files selected", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            string exportPath;
+            folderBrowserDialog.SelectedPath = _folderTextBox.Text;
+            DialogResult result = folderBrowserDialog.ShowDialog(this);
+            if (result == DialogResult.OK) {
+                exportPath = folderBrowserDialog.SelectedPath;
+
+                int failedCounter = 0;
+                progressBar.Maximum = selectedFileItems.Count;
+                progressBar.Value = 0;
+                progressBar.SetState(1);
+                progressLabel.Text = "Starting export...";
+                foreach (FileItem fileItem in selectedFileItems) {
+                    progressBar.Value += 1;
+                    progressLabel.Text = $"Exporting {fileItem.FileName} ...";
+                    if (!Export(fileItem, exportPath))
+                        failedCounter += 1;
+                }
+                if (failedCounter > 0) {
+                    progressBar.SetState(2);
+                    progressLabel.Text = $"Exporting complete. {failedCounter} files has/have failed!";
+                } else {
+                    progressLabel.Text = "Exporting complete!";
+                }
+            }
+        } // end of ExportButton_Click
     }
 }

@@ -609,7 +609,7 @@ namespace LoxStatEdit
             // Replace comma, if it is the decimal separator
             if (chrDec == ",")
             {
-                input = Regex.Replace(input, "/.", "");
+                input = Regex.Replace(input, @"\.", "");
                 input = Regex.Replace(input, chrDec, chrGrp);
             }
 
@@ -642,29 +642,29 @@ namespace LoxStatEdit
 
                     try
                     {
-                        int y_max;
+                        int colIndex_max;
 
                         // Check if all columns need to be recalculated or only one
                         if (_dataGridView.SelectedRows.Count == 1)
                         {
-                            y_max = _dataGridView.ColumnCount;
+                            colIndex_max = _dataGridView.ColumnCount;
                         }
                         else
                         {
-                            y_max = _dataGridView.SelectedCells[0].ColumnIndex + 1;
+                            colIndex_max = _dataGridView.SelectedCells[0].ColumnIndex + 1;
                         }
 
-                        for (int x = _dataGridView.SelectedCells[0].RowIndex; x < _dataGridView.Rows.Count; x++)
+                        for (int rowIndex = _dataGridView.SelectedCells[0].RowIndex; rowIndex < _dataGridView.Rows.Count; rowIndex++)
                         {
 
-                            for (int y = _dataGridView.SelectedCells[0].ColumnIndex; y < y_max; y++)
+                            for (int colIndex = _dataGridView.SelectedCells[0].ColumnIndex; colIndex < colIndex_max; colIndex++)
                             {
                                 //Console.WriteLine($"x: {x}, y: {y}");
 
                                 // if a row is selected, skip first two columns
-                                if (y >= 2)
+                                if (colIndex >= 2)
                                 {
-                                    replacement = Convert.ToDouble(_dataGridView.Rows[x].Cells[y].Value).ToString("#.###", CultureInfo.CreateSpecificCulture("en-EN"));
+                                    replacement = Convert.ToDouble(_dataGridView.Rows[rowIndex].Cells[colIndex].Value).ToString("#.#########", CultureInfo.CreateSpecificCulture("en-EN"));
                                     formula = Regex.Replace(input, pattern, replacement);
                                     try
                                     {
@@ -675,8 +675,10 @@ namespace LoxStatEdit
                                         myValue = Convert.ToDouble(replacement);
                                     }
 
-                                    _dataGridView.Rows[x].Cells[y].Value = myValue.ToString();
-                                    _dataTable.Rows[x][y] = myValue;
+                                    //_dataGridView.Rows[x].Cells[y].Value = myValue.ToString();
+                                    _dataTable.Rows[rowIndex][colIndex] = myValue;
+                                    var dataPoint = _loxStatFile.DataPoints[rowIndex];
+                                    dataPoint.Values[colIndex - _valueColumnOffset] = myValue;
                                 }
                             }
                         }
@@ -1127,7 +1129,7 @@ namespace LoxStatEdit
                                 }
                                 else if (ColumnIndex == 1) // Specific check for column with index 1
                                 {
-                                    var input = cells[i].Trim();
+                                    string input = cells[i].Trim();
 
                                     // Attempt to parse the cell value as a DateTime
                                     DateTime valueDateTime;
@@ -1143,7 +1145,7 @@ namespace LoxStatEdit
                                         //Console.WriteLine($"StartingRow: {StartingRow} - StartingColumn: {StartingColumn} - i: {i} - ColumnIndex: {ColumnIndex}");
 
                                         dataPoint.Timestamp = valueDateTime;
-                                        //_dataTable.Rows[StartingRow][timestampColumn.Name] = valueDateTime;
+                                        _dataTable.Rows[StartingRow][timestampColumn.Name] = valueDateTime;
                                         //_dataGridView.UpdateCellValue(ColumnIndex, StartingRow);
                                     }
                                     else
@@ -1160,13 +1162,14 @@ namespace LoxStatEdit
 
                                     var input = cells[i].Trim();
 
+                                    /*
                                     // Replace comma, if it is the decimal separator
                                     // Is this really needed? Have to test with different locales
                                     if (chrDec == ",")
                                     {
-                                        input = Regex.Replace(input, "/.", "");
+                                        input = Regex.Replace(input, "\.", "");
                                         input = Regex.Replace(input, chrDec, chrGrp);
-                                    }
+                                    } */
 
                                     // Attempt to parse the cell value as a double
                                     double valueDouble;
@@ -1177,7 +1180,7 @@ namespace LoxStatEdit
                                         // If the value is a valid double, assign it
                                         var dataPoint = _loxStatFile.DataPoints[StartingRow];
                                         dataPoint.Values[ColumnIndex - _valueColumnOffset] = valueDouble;
-                                        //_dataTable.Rows[StartingRow][ColumnIndex] = valueDouble;
+                                        _dataTable.Rows[StartingRow][ColumnIndex] = valueDouble;
                                         //_dataGridView.UpdateCellValue(ColumnIndex, StartingRow);
                                     }
                                     else
@@ -1193,7 +1196,9 @@ namespace LoxStatEdit
                     }
                 }
                 RefreshProblems();
-                RefreshChart();
+                //RefreshChart();
+                // update chart
+                _chart.DataBind();
                 _dataGridView.Refresh();
             }
         }
