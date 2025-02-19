@@ -45,7 +45,7 @@ namespace LoxStatEdit
             System.Windows.Forms.Button filterButton;
             System.Windows.Forms.Button convertButton;
             System.Windows.Forms.Button deleteButton;
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle9 = new System.Windows.Forms.DataGridViewCellStyle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MiniserverForm));
             System.Windows.Forms.Button exportButton;
             this._urlTextBox = new System.Windows.Forms.TextBox();
@@ -165,7 +165,7 @@ namespace LoxStatEdit
             aboutLabel.Name = "aboutLabel";
             aboutLabel.Size = new System.Drawing.Size(171, 18);
             aboutLabel.TabIndex = 100;
-            aboutLabel.Text = "LoxStatEdit v1.0.7.2 (2025.02.13)";
+            aboutLabel.Text = "LoxStatEdit v1.0.7.3 (2025.02.19)";
             aboutLabel.Click += new System.EventHandler(this.aboutLabel_Click);
             // 
             // openFolderButton
@@ -323,8 +323,8 @@ namespace LoxStatEdit
             // _yearMonthCol
             // 
             this._yearMonthCol.DataPropertyName = "YearMonth";
-            dataGridViewCellStyle8.Format = "yyyy-MM";
-            this._yearMonthCol.DefaultCellStyle = dataGridViewCellStyle8;
+            dataGridViewCellStyle9.Format = "yyyy-MM";
+            this._yearMonthCol.DefaultCellStyle = dataGridViewCellStyle9;
             this._yearMonthCol.HeaderText = "Year/Month";
             this._yearMonthCol.MinimumWidth = 10;
             this._yearMonthCol.Name = "_yearMonthCol";
